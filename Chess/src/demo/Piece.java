@@ -10,6 +10,8 @@ public class Piece {
 	public boolean isWhite;
 	public boolean isPinned;
 	public boolean captured = false;
+	//for castling
+	public boolean hasMoved = false;
 	public int[] directionIndicesIfPinned;
 	public int[] directionIndices;
 	static int[] possibleDirections = {7,-7,9,-9,8,-8,1,-1,6,-6,15,-15,10,-10,17,-17};
@@ -27,6 +29,7 @@ public class Piece {
 	public static final int[] knightDir =  {6,-6,15,-15,10,-10,17,-17};
 	*/
 	//public ArrayList<Integer> attackingSquares = new ArrayList<Integer>();
+	
 	//VISUALISATION MOVES
 	//
 	//	15		17
@@ -48,6 +51,7 @@ public class Piece {
 	//-9   -8   -7
 	
 	//queen also works for king
+	
 	King king;
 	Piece attackingPiece;
 	public void MoveTo(int position) {
@@ -56,28 +60,35 @@ public class Piece {
 			attackingPiece = king.GetCheckingPiece();
 			for(int square : GetLegalMoves()) {
 				if(square == position) {
-					//-1 is wanneer de kleur van een piece op een square niks is (dus er staat geen piece)
-					boolean isOppositeColor = Chess.stoneToColor(Board.GetPositionGrid()[position]) != -1 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
+					// 0 want dan staat er niemand
+					boolean isOppositeColor = Board.GetPositionGrid()[position] != 0 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
 					if(isOppositeColor) {
 						Capture(position);
 					}
 					this.position = position;
-					Board.updatePosition();
-					king.isInCheck = false;
-					//Check if opposite king is in check
-					for(Piece opps : Board.pieces) {
-						opps.isPinned = false;
-					}
-					for(Piece slidingPiece : Board.GetSlidingPieces(stone)) {
-						System.out.println("oma lord");
-						slidingPiece.Pin();
-					}
-					
-					((King) Board.GetKing(-stone)).isInCheck();
+					MiscMoveFunctions();
 					break;
 				}
 			}
 		}
+	}
+	
+	void MiscMoveFunctions() {
+		Board.updatePosition();
+		king.isInCheck = false;
+		
+		//unpin all pieces
+		for(Piece opps : Board.pieces) {
+			opps.isPinned = false;
+		}
+		//pin pieces that should be pinned
+		for(Piece slidingPiece : Board.GetSlidingPieces(stone)) {
+			System.out.println("oma lord");
+			slidingPiece.Pin();
+		}
+		hasMoved = true;
+		//Check if opposite king is in check
+		((King) Board.GetKing(-stone)).isInCheck();
 	}
 	
 	public int[] GetAttackingSquares() {
@@ -209,9 +220,12 @@ public class Piece {
 	
 	//still have to add double checks and pins 
 	public int[] GetLegalMoves() {
-		if(((King)Board.GetKing(stone)).isInCheck) {
+		
+		if(((King)Board.GetKing(stone)).doubleCheck) {
+			return new int[0];
+		}  else if(((King)Board.GetKing(stone)).isInCheck) {
 			return GetMoveableSquaresInCheck();
-		} 
+		}
 		return GetMoveableSquares();
 	}
 	

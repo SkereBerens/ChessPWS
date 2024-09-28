@@ -5,7 +5,10 @@ import chesspresso.Chess;
 
 public class King extends Piece{
 	boolean isInCheck = false;
+	boolean doubleCheck = false;
 	Piece attackingPiece;
+	Piece rookShort;
+	Piece rookLong;
 	
 	//Chess.getNumSquares to edge heb ik zelf geschreven: zie onderaan chesspresso.Chess.
 	@Override int[] GetMoveableSquares() {
@@ -55,19 +58,41 @@ public class King extends Piece{
 		return GetCheckingPieceOpps();
 	}
 	
-	public int isInCheck() {
+	int[] GetAllOpponentAttackSquares() {
+		ArrayList<Integer> squares = new ArrayList<Integer>();
+		for(Piece piece : Board.GetPiecesOfColor(!isWhite)) {
+			for(int square : piece.GetAttackingSquares()) {
+				squares.add(square);
+			}
+		}
+		return squares.stream().mapToInt(Integer::intValue).toArray();
+	}
+	
+	public void isInCheck() {
+		ArrayList<Integer> squares = new ArrayList<Integer>();
 		for(Piece piece : Board.GetPiecesOfColor(!isWhite)) {
 			for(int square : piece.GetAttackingSquares()) {
 				if(square == position) {
+					squares.add(square);
 					isInCheck = true;
 					attackingPiece = piece;
-					return 0;
+					
 				}
 			}
 		}
+		
+		if(squares.size() > 1) {
+			isInCheck = true;
+			doubleCheck = true;
+			return;
+		} else if(squares.size( )== 1) {
+			isInCheck = true;
+			return;
+		}
+		doubleCheck = false;
 		isInCheck = false;
 		attackingPiece= null;
-		return 0;
+		return;
 	}
 	/*
 	public boolean isInCheckMonster() {
@@ -126,6 +151,42 @@ public class King extends Piece{
 		return attackingPiece;
 	}
 	
+	//
+	//CASTLING
+	//
+	
+	public boolean hasCastlingRightsLong = true;
+	public boolean hasCastlingRightsShort = true;
+	
+	public void CastleShort() {
+		CheckShortCastlingRights();
+		if(hasCastlingRightsShort) {
+			int[] OppsAttackingSquares = GetAllOpponentAttackSquares();
+			for(int square : OppsAttackingSquares) {
+				if(square == Chess.E1 || square == Chess.F1 || square == Chess.G1) {
+					return;
+				}
+			}
+			
+			if(Board.GetPositionGrid()[Chess.F1] != 0|| Board.GetPositionGrid()[Chess.G1] != 0) {
+				return;
+			}
+			rookShort.position = Chess.F1;
+			this.position = Chess.G1;
+		}
+		
+		
+	}
+	
+	void CheckShortCastlingRights() {
+	
+		if(!hasMoved && !rookShort.hasMoved) {
+			return;
+		}
+		
+		hasCastlingRightsShort = false;
+	}
+	
 	King(int startingPos, boolean color) {
 		position = startingPos;
 		isWhite = color;
@@ -135,6 +196,9 @@ public class King extends Piece{
 		} else {
 			stone = Chess.BLACK_KING;
 		}
+		//for castling
+		rookShort = Board.FindPieceByPosition(Chess.H1);
+		rookLong = Board.FindPieceByPosition(Chess.A1);
 		//to update attacking squares
 		Board.addPiece(this);
 		GetMoveableSquares();
