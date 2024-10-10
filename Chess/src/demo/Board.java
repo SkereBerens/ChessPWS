@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import chesspresso.Chess;
 
 public class Board {
-	static ArrayList<Piece> pieces = new ArrayList<Piece>();
+	public static ArrayList<Piece> pieces = new ArrayList<Piece>();
 	
 	//bottom right corner is H8 and top left corner is A1
 	static int[] positionGrid = {0,0,0,0,0,0,0,0,
@@ -31,7 +31,7 @@ public class Board {
 	}
 	
 	//FEN is een soort notatie voor een positie
-	public String GetFEN() {
+	static public String GetFEN() {
 		String positionFen = "";
 		int emptySpace = 0;
 		String[] emptySpaces = {"", "1", "2", "3", "4", "5", "6", "7", "8"};

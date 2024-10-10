@@ -476,20 +476,38 @@ public abstract class Chess
 		
 		//for knight
 		//only can return 1 or 0 for knight, so maybe problem for future
-		if(direction == 15 || direction == 6) {
-			if(!IsInList(Chess.NorthEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos)) {
+		
+		
+		if(direction == 15) {
+			if(!IsInList(Chess.NorthEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos) && !IsInList(Chess.NorthEdge, tempPos + 8)) {
 				num++;
 			}
-		} else if(direction == 17 || direction == 10) {
-			if(!IsInList(Chess.NorthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos)) {
+		} else if(direction == 6) {
+			if(!IsInList(Chess.NorthEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos - 1)) {
 				num++;
 			}
-		} else if(direction == -10 || direction == -17) {
-			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos)) {
+		} else if(direction == -10) {
+			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos -1)) {
 				num++;
 			}
-		} else if(direction == -15 || direction == -6) {
-			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos)) {
+		} else if(direction == -17) {
+			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos) && !IsInList(Chess.SouthEdge, tempPos -8)) {
+				num++;
+			}
+		} else if(direction == -15) {
+			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos) && !IsInList(Chess.NorthEdge, tempPos - 8)) {
+				num++;
+			}
+		} else if(direction == -6) {
+			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos) && !IsInList(Chess.NorthEdge, tempPos + 1)) {
+				num++;
+			}
+		} else if(direction == 10) {
+			if(!IsInList(Chess.NorthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos + 1)) {
+				num++;
+			}
+		} else if(direction == 17) {
+			if(!IsInList(Chess.NorthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos) && !IsInList(Chess.NorthEdge, tempPos + 8)) {
 				num++;
 			}
 		} 
@@ -508,16 +526,17 @@ public abstract class Chess
 		return false;
 	}
 	
+	//{7,-7,9,-9,8,-8,1,-1,6,-6,15,-15,10,-10,17,-17}
 	//zelf geschreven
 	public static int GetOppositeDirectionIndex(int directionIndex) {
 		if(directionIndex == 0) {
-			return 3;
-		} else if(directionIndex == 1) {
-			return 2;
-		} else if(directionIndex == 2) {
 			return 1;
-		} else if(directionIndex == 3) {
+		} else if(directionIndex == 1) {
 			return 0;
+		} else if(directionIndex == 2) {
+			return 3;
+		} else if(directionIndex == 3) {
+			return 2;
 		} else if(directionIndex == 4) {
 			return 5;
 		} else if(directionIndex == 5) {

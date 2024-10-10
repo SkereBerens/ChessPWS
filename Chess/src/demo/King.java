@@ -76,7 +76,6 @@ public class King extends Piece{
 					squares.add(square);
 					isInCheck = true;
 					attackingPiece = piece;
-					
 				}
 			}
 		}
@@ -155,7 +154,8 @@ public class King extends Piece{
 	//CASTLING
 	//
 	
-	public boolean hasCastlingRightsLong = true;
+	//SHORT CASTLING
+	
 	public boolean hasCastlingRightsShort = true;
 	
 	public void CastleShort() {
@@ -163,28 +163,81 @@ public class King extends Piece{
 		if(hasCastlingRightsShort) {
 			int[] OppsAttackingSquares = GetAllOpponentAttackSquares();
 			for(int square : OppsAttackingSquares) {
-				if(square == Chess.E1 || square == Chess.F1 || square == Chess.G1) {
+				if(isWhite && (square == Chess.E1 || square == Chess.F1 || square == Chess.G1)) {
+					return;
+				} else if(!isWhite && (square == Chess.E8 || square == Chess.F8 || square == Chess.G8)) {
 					return;
 				}
 			}
 			
-			if(Board.GetPositionGrid()[Chess.F1] != 0|| Board.GetPositionGrid()[Chess.G1] != 0) {
+			if(isWhite && (Board.GetPositionGrid()[Chess.F1] != 0 || Board.GetPositionGrid()[Chess.G1] != 0)) {
+				return;
+			} else if(!isWhite && (Board.GetPositionGrid()[Chess.F8] != 0 || Board.GetPositionGrid()[Chess.G8] != 0)) {
 				return;
 			}
-			rookShort.position = Chess.F1;
-			this.position = Chess.G1;
+			
+			if(isWhite) {
+				this.hasMoved = true;
+				rookShort.position = Chess.F1;
+				this.position = Chess.G1;
+				return;
+			}
+			this.hasMoved = true;
+			rookShort.position = Chess.F8;
+			this.position = Chess.G8;
 		}
-		
-		
 	}
+	
+
 	
 	void CheckShortCastlingRights() {
 	
-		if(!hasMoved && !rookShort.hasMoved) {
+		if(!hasMoved && !rookShort.hasMoved && !rookShort.captured) {
 			return;
 		}
 		
 		hasCastlingRightsShort = false;
+	}
+	
+	//LONG CASTLING
+	public boolean hasCastlingRightsLong = true;
+	
+	public void CastleLong() {
+		CheckLongCastlingRights();
+		if(hasCastlingRightsLong) {
+			int[] OppsAttackingSquares = GetAllOpponentAttackSquares();
+			for(int square : OppsAttackingSquares) {
+				if(isWhite && (square == Chess.E1 || square == Chess.D1 || square == Chess.C1)) {
+					return;
+				} else if(!isWhite && (square == Chess.E8 || square == Chess.D8 || square == Chess.C8)) {
+					return;
+				}
+			}
+			
+			if(isWhite && (Board.GetPositionGrid()[Chess.D1] != 0|| Board.GetPositionGrid()[Chess.C1] != 0)) {
+				return;
+			} else if(!isWhite && (Board.GetPositionGrid()[Chess.D8] != 0|| Board.GetPositionGrid()[Chess.C8] != 0)) {
+				return;
+			}
+			
+			if(isWhite) {
+				this.hasMoved = true;
+				rookLong.position = Chess.D1;
+				this.position = Chess.C1;
+				return;
+			}
+			this.hasMoved = true;
+			rookLong.position = Chess.D8;
+			this.position = Chess.C8;
+		}
+	}
+	
+	void CheckLongCastlingRights() {
+		if(!hasMoved && !rookLong.hasMoved && !rookLong.captured) {
+			return;
+		}
+		
+		hasCastlingRightsLong = false;
 	}
 	
 	King(int startingPos, boolean color) {
@@ -197,8 +250,14 @@ public class King extends Piece{
 			stone = Chess.BLACK_KING;
 		}
 		//for castling
-		rookShort = Board.FindPieceByPosition(Chess.H1);
-		rookLong = Board.FindPieceByPosition(Chess.A1);
+		if(isWhite) {
+			rookShort = Board.FindPieceByPosition(Chess.H1);
+			rookLong = Board.FindPieceByPosition(Chess.A1);
+		} else {
+			rookShort = Board.FindPieceByPosition(Chess.H8);
+			rookLong = Board.FindPieceByPosition(Chess.A8);
+		}
+		
 		//to update attacking squares
 		Board.addPiece(this);
 		GetMoveableSquares();

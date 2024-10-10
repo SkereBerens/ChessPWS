@@ -3,7 +3,7 @@ import java.util.Arrays;
 import chesspresso.Chess;
 
 public class Bishop extends Piece {
-	Bishop(int startingPos, boolean color) {
+	public Bishop(int startingPos, boolean color) {
 		position = startingPos;
 		isWhite = color;
 		directionIndices = bishopDirIndices;

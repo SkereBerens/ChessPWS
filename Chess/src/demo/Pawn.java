@@ -7,32 +7,29 @@ public class Pawn extends Piece{
 	
 	@Override public void MoveTo(int position) {
 		if(!captured) {
-			king = ((King)Board.GetKing(stone));
-			attackingPiece = king.GetCheckingPiece();
-			for(int square : GetLegalMoves()) {
-				if(square == position) {
-					boolean isOppositeColor = Chess.stoneToColor(Board.GetPositionGrid()[position]) != -1 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
-					boolean isOnDiagonalSquare = ((int) (this.position - Math.signum(stone)* 9) == position || (int) (this.position - Math.signum(stone)* 7) == position);
-					//-1 is wanneer de kleur van een piece op een square niks is (dus er staat geen piece)
-					
-					if(isOppositeColor && isOnDiagonalSquare) {
-						Capture(position);
+			if(ply % 2 == 0 && !isWhite || ply % 2 != 0 && isWhite) {
+				king = ((King)Board.GetKing(stone));
+				attackingPiece = king.GetCheckingPiece();
+				for(int square : GetLegalMoves()) {
+					if(square == position) {
+						// 0 want dan staat er niemand
+						
+						boolean isOppositeColor = Board.GetPositionGrid()[position] != 0 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
+						boolean isOnDiagonalSquare = ((int) (this.position - Math.signum(stone)* 9) == position || (int) (this.position - Math.signum(stone)* 7) == position);
+						if(isOppositeColor && isOnDiagonalSquare) {
+							Capture(position);
+						}
+						this.position = position;
+						MiscMoveFunctions();
+						break;
 					}
-					this.position = position;
-					Board.updatePosition();
-					king.isInCheck = false;
-					//Check if opposite king is in check
-					for(Piece slidingPiece : Board.GetSlidingPieces(stone)) {
-						System.out.println("oma lord");
-						slidingPiece.Pin();
-					}
-					
-					((King) Board.GetKing(-stone)).isInCheck();
-					break;
 				}
 			}
+			
 		}
 	} 
+	
+	
 	
 	@Override int[] GetMoveableSquares() {
 		ArrayList<Integer> moveableSquares = new ArrayList<Integer>();
@@ -73,10 +70,10 @@ public class Pawn extends Piece{
 				}
 			}
 		}
-			//move foreward 1 or 2 depending on row
-			//signum geeft het teken van iets: dus  +1 of  -1
+		//move foreward 1 or 2 depending on row
+		//signum geeft het teken van iets: dus  +1 of  -1
 			
-			//convert een list naar een array (op internet opgezocht)
+		//convert een list naar een array (op internet opgezocht)
 		return moveableSquares.stream().mapToInt(Integer::intValue).toArray();
 	}	
 	

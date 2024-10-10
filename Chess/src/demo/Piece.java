@@ -54,24 +54,29 @@ public class Piece {
 	
 	King king;
 	Piece attackingPiece;
+	
+	//TEMPORARY MOVE ORDER THING
+	static int ply = 1;
 	public void MoveTo(int position) {
 		if(!captured) {
-			king = ((King)Board.GetKing(stone));
-			attackingPiece = king.GetCheckingPiece();
-			for(int square : GetLegalMoves()) {
-				if(square == position) {
-					// 0 want dan staat er niemand
-					boolean isOppositeColor = Board.GetPositionGrid()[position] != 0 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
-					if(isOppositeColor) {
-						Capture(position);
+			if(ply % 2 == 0 && !isWhite || ply % 2 != 0 && isWhite) {
+				for(int square : GetLegalMoves()) {
+					if(square == position) {
+						// 0 want dan staat er niemand
+						boolean isOppositeColor = Board.GetPositionGrid()[position] != 0 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
+						if(isOppositeColor) {
+							Capture(position);
+						}
+						this.position = position;
+						MiscMoveFunctions();
+						break;
 					}
-					this.position = position;
-					MiscMoveFunctions();
-					break;
 				}
 			}
+			
 		}
 	}
+
 	
 	void MiscMoveFunctions() {
 		Board.updatePosition();
@@ -83,12 +88,13 @@ public class Piece {
 		}
 		//pin pieces that should be pinned
 		for(Piece slidingPiece : Board.GetSlidingPieces(stone)) {
-			System.out.println("oma lord");
+			//System.out.println("oma lord");
 			slidingPiece.Pin();
 		}
 		hasMoved = true;
 		//Check if opposite king is in check
 		((King) Board.GetKing(-stone)).isInCheck();
+		ply++;
 	}
 	
 	public int[] GetAttackingSquares() {
@@ -97,6 +103,9 @@ public class Piece {
 			for(int directionIndex : directionIndices) {
 				for(int i = 1; i < Chess.NumSquaresToEdge[this.position][directionIndex] + 1; i++) {
 					attackSquares.add(this.position + possibleDirections[directionIndex] * i);
+					if(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * i] != 0) {
+						break;
+					} 
 				}
 			}
 		}
@@ -203,11 +212,12 @@ public class Piece {
 						
 						break;
 					} else {
-						System.out.println("GAYYY");
-						for(int j = i + 1; j < Chess.NumSquaresToEdge[this.position + possibleDirections[directionIndex] * i][directionIndex] + 1; j++) {
+						for(int j = 1; j < Chess.NumSquaresToEdge[this.position + possibleDirections[directionIndex] * i][directionIndex] + 1; j++) {
 							if(this.position + possibleDirections[directionIndex] * i + possibleDirections[directionIndex] * j == Board.GetKing(-stone).position) {
 								Board.FindPieceByPosition(this.position + possibleDirections[directionIndex] * i).isPinned = true;
 								Board.FindPieceByPosition(this.position + possibleDirections[directionIndex] * i).directionIndicesIfPinned = new int[] {directionIndex, Chess.GetOppositeDirectionIndex(directionIndex)};
+								break;
+							} else if(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * i + possibleDirections[directionIndex] * j] != 0) {
 								break;
 							}
 						}
@@ -220,7 +230,8 @@ public class Piece {
 	
 	//still have to add double checks and pins 
 	public int[] GetLegalMoves() {
-		
+		king = ((King)Board.GetKing(stone));
+		attackingPiece = king.GetCheckingPiece();
 		if(((King)Board.GetKing(stone)).doubleCheck) {
 			return new int[0];
 		}  else if(((King)Board.GetKing(stone)).isInCheck) {
