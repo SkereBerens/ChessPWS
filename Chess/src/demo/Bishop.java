@@ -12,8 +12,7 @@ public class Bishop extends Piece {
 		} else {
 			stone = Chess.BLACK_BISHOP;
 		}
-		//to update attacking squares
-		Board.addPiece(this);
-		GetMoveableSquares();
+		
+		Model.pieces.add(this);
 	}
 }

@@ -14,8 +14,7 @@ public class Rook extends Piece{
 		} else {
 			stone = Chess.BLACK_ROOK;
 		}
-		//to update attacking squares
-		Board.addPiece(this);
-		GetMoveableSquares();
+		
+		Model.pieces.add(this);
 	}
 }

@@ -2,9 +2,12 @@ package demo;
 
 
 
+import java.util.ArrayList;
+
 import chesspresso.Chess;
 
 public class Model {
+	public static ArrayList<Piece> pieces = new ArrayList<Piece>();
 	public Piece bishop = new Bishop(Chess.C1, true);
 	public Piece bishop1 = new Bishop(Chess.F1, true);
 	public Piece bishop2 = new Bishop(Chess.C8, false);
@@ -35,9 +38,86 @@ public class Model {
 	public Piece pawn15 = new Pawn(Chess.G7, false);
 	public Piece queen = new Queen(Chess.D1, true);
 	public Piece queen1 = new Queen(Chess.D8, false);
-	public Piece king = new King(Chess.E1, true);
-	public Piece king1 = new King(Chess.E8, false);
+	
+	public Piece queen2 = new Queen(-1, true);
+	public Piece queen3 = new Queen(-1, false);
+	public Piece queen4 = new Queen(-1, true);
+	public Piece queen5 = new Queen(-1, false);
+	public Piece queen6 = new Queen(-1, true);
+	public Piece queen7 = new Queen(-1, false);
+	public Piece queen8 = new Queen(-1, true);
+	public Piece queen9 = new Queen(-1, false);
+	public Piece queen10 = new Queen(-1, true);
+	public Piece queen11 = new Queen(-1, false);
+	public Piece queen12 = new Queen(-1, true);
+	public Piece queen13 = new Queen(-1, false);
+	public Piece queen14 = new Queen(-1, true);
+	public Piece queen15 = new Queen(-1, false);
+	public Piece queen16 = new Queen(-1, true);
+	public Piece queen17 = new Queen(-1, false);
+	
+	public Piece rook4 = new Rook(-1, true);
+	public Piece rook5 = new Rook(-1, false);
+	public Piece rook6 = new Rook(-1, true);
+	public Piece rook7 = new Rook(-1, false);
+	public Piece rook8 = new Rook(-1, true);
+	public Piece rook9 = new Rook(-1, false);
+	public Piece rook10 = new Rook(-1, true);
+	public Piece rook11 = new Rook(-1, false);
+	public Piece rook12 = new Rook(-1, true);
+	public Piece rook13 = new Rook(-1, false);
+	public Piece rook14 = new Rook(-1, true);
+	public Piece rook15 = new Rook(-1, false);
+	public Piece rook16 = new Rook(-1, true);
+	public Piece rook17 = new Rook(-1, false);
+	public Piece rook18 = new Rook(-1, true);
+	public Piece rook19 = new Rook(-1, false);
+	
+	public Piece bishop4 = new Bishop(-1, true);
+	public Piece bishop5 = new Bishop(-1, false);
+	public Piece bishop6 = new Bishop(-1, true);
+	public Piece bishop7 = new Bishop(-1, false);
+	public Piece bishop8 = new Bishop(-1, true);
+	public Piece bishop9 = new Bishop(-1, false);
+	public Piece bishop10 = new Bishop(-1, true);
+	public Piece bishop11 = new Bishop(-1, false);
+	public Piece bishop12 = new Bishop(-1, true);
+	public Piece bishop13 = new Bishop(-1, false);
+	public Piece bishop14 = new Bishop(-1, true);
+	public Piece bishop15 = new Bishop(-1, false);
+	public Piece bishop16 = new Bishop(-1, true);
+	public Piece bishop17 = new Bishop(-1, false);
+	public Piece bishop18 = new Bishop(-1, true);
+	public Piece bishop19 = new Bishop(-1, false);
+	
+	public Piece knight4 = new Knight(-1, true);
+	public Piece knight5 = new Knight(-1, false);
+	public Piece knight6 = new Knight(-1, true);
+	public Piece knight7 = new Knight(-1, false);
+	public Piece knight8 = new Knight(-1, true);
+	public Piece knight9 = new Knight(-1, false);
+	public Piece knight10 = new Knight(-1, true);
+	public Piece knight11 = new Knight(-1, false);
+	public Piece knight12 = new Knight(-1, true);
+	public Piece knight13 = new Knight(-1, false);
+	public Piece knight14 = new Knight(-1, true);
+	public Piece knight15 = new Knight(-1, false);
+	public Piece knight16 = new Knight(-1, true);
+	public Piece knight17 = new Knight(-1, false);
+	public Piece knight18 = new Knight(-1, true);
+	public Piece knight19 = new Knight(-1, false);
+	
+	
 	public Model() {
+		for(Piece piece : pieces) {
+			if(piece.position != -1) {
+				Board.addPiece(piece);
+			}
+		}
+		Piece king = new King(Chess.E1, true);
+		Piece king1 = new King(Chess.E8, false);
+		Board.addPiece(king);
+		Board.addPiece(king1);
 		Board.updatePosition();
 	}
 }

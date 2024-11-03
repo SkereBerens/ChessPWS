@@ -327,6 +327,14 @@ public abstract class Chess
         return NO_PIECE;
     }
     
+    public static final int charToStone(char ch) {
+    	for(int stone = -6; stone <= 6; stone++) {
+    		if(stone < 0 && pieceChars[stone * -1] == ch) return stone;
+    		if(stone > 0 && pieceChars[stone + 6] == ch) return stone;
+    	}
+    	return NO_STONE;
+    }
+    
     /**
      * Returns a character representing the piece.
      *
@@ -345,6 +353,7 @@ public abstract class Chess
      *@param stone the stone
      *@return the character representing the stone, or '?' if an illegal piece is passed
      */
+    //ge edit door mij hihi
     public static final char stoneToChar(int stone)
     {
         if (stone < 0) return pieceChars[-stone]; else return pieceChars[stone + 6];
@@ -477,6 +486,11 @@ public abstract class Chess
 		//for knight
 		//only can return 1 or 0 for knight, so maybe problem for future
 		
+			//	15		17
+			//6			  10
+			//	  knight
+			//-10		  -6
+			//	-17		-15
 		
 		if(direction == 15) {
 			if(!IsInList(Chess.NorthEdge, tempPos) && !IsInList(Chess.WestEdge, tempPos) && !IsInList(Chess.NorthEdge, tempPos + 8)) {
@@ -495,11 +509,11 @@ public abstract class Chess
 				num++;
 			}
 		} else if(direction == -15) {
-			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos) && !IsInList(Chess.NorthEdge, tempPos - 8)) {
+			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos) && !IsInList(Chess.SouthEdge, tempPos - 8)) {
 				num++;
 			}
 		} else if(direction == -6) {
-			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos) && !IsInList(Chess.NorthEdge, tempPos + 1)) {
+			if(!IsInList(Chess.SouthEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos) && !IsInList(Chess.EastEdge, tempPos + 1)) {
 				num++;
 			}
 		} else if(direction == 10) {
@@ -516,10 +530,20 @@ public abstract class Chess
 		return num;
 	}
 	
-    //zelf geschreven, used for detecting if on edge and if position is in position array
+    //zelf geschreven, used for detecting if on edge and if position is in position array voor integers
 	public static boolean IsInList(int[] list, int Int) {
 		for(int edge : list) {
 			if(Int == edge) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	//voor characters lol
+	public static boolean IsInListChr(char[] list, char ch) {
+		for(char chr : list) {
+			if(ch == chr) {
 				return true;
 			}
 		}

@@ -1,6 +1,9 @@
 package demo;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import ControllTest.Controlla;
 import chesspresso.Chess;
 
 public class King extends Piece{
@@ -10,39 +13,95 @@ public class King extends Piece{
 	Piece rookShort;
 	Piece rookLong;
 	
+	@Override
+	public void MoveTo(int position) throws IOException {
+		if(!captured) {
+			for(int square : GetLegalMoves()) {
+				if(square == position) {
+					// 0 want dan staat er niemand
+					boolean isOppositeColor = Board.GetPositionGrid()[position] != 0 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
+					if(isOppositeColor) {
+						Capture(position);
+						movesTilDraw = -1;
+					}
+					
+					if(CanCastleShort() && (position == Chess.G8 || position == Chess.G1)) {
+						Controlla.CastleShort(isWhite);
+						CastleShort();
+					} else if(CanCastleLong() && (position == Chess.C8 || position == Chess.C1)) {
+						Controlla.CastleLong(isWhite);
+						CastleLong();
+					} else {
+						Controlla.MovePieceGUI(this, position);
+						this.position = position;
+					}
+					movesTilDraw++;
+					MiscMoveFunctions();
+					break;
+				}
+			}
+			
+		}
+	}
+	
+	
 	//Chess.getNumSquares to edge heb ik zelf geschreven: zie onderaan chesspresso.Chess.
+	ArrayList<Integer> attackedSquaresTotalList = new ArrayList<Integer>();
+	int[] attackedSquaresTotal;
 	@Override int[] GetMoveableSquares() {
-		ArrayList<Integer> moveableSquares = new ArrayList<Integer>();
-		ArrayList<Integer> attackedSquares = new ArrayList<Integer>();
+		
 		for(Piece piece : Board.GetPiecesOfColor(!isWhite)) {
 			for(int square : piece.GetAttackingSquares()) {
-				attackedSquares.add(square);
+				attackedSquaresTotalList.add(square);
 			}
 		}
+		attackedSquaresTotal = attackedSquaresTotalList.stream().mapToInt(Integer::intValue).toArray();
+		if(CanCastleShort()) {
+			if(isWhite) {
+				moveableSquaresList.add(Chess.G1);
+			} else {
+				moveableSquaresList.add(Chess.G8);
+			}
+		}
+		
+		if(CanCastleLong()) {
+			if(isWhite) {
+				moveableSquaresList.add(Chess.C1);
+			} else {
+				moveableSquaresList.add(Chess.C8);
+			}
+		}
+		
 		for(int directionIndex : directionIndices) {
-			if(Chess.NumSquaresToEdge[position][directionIndex] != 0 && !Chess.IsInList(attackedSquares.stream().mapToInt(Integer::intValue).toArray(), this.position + possibleDirections[directionIndex])) {
+			if(Chess.NumSquaresToEdge[position][directionIndex] != 0 && !Chess.IsInList(attackedSquaresTotal, this.position + possibleDirections[directionIndex])) {
 				if(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex]] == 0) {
-					moveableSquares.add(this.position + possibleDirections[directionIndex]);
+					moveableSquaresList.add(this.position + possibleDirections[directionIndex]);
 				} else if(Chess.stoneToColor(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex]]) != Chess.stoneToColor(stone)){
-					moveableSquares.add(this.position + possibleDirections[directionIndex]);
+					moveableSquaresList.add(this.position + possibleDirections[directionIndex]);
 				}
 			}			
 		}
-		return moveableSquares.stream().mapToInt(Integer::intValue).toArray();
+		attackedSquaresTotalList.removeAll(attackedSquaresTotalList);
+		moveableSquares = moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
+		moveableSquaresList.removeAll(moveableSquaresList);
+		return moveableSquares;
 	}
 	
 	@Override public int[] GetMoveableSquaresInCheck() {
 		return GetMoveableSquares();
 	}
 	
+	
 	@Override public int[] GetAttackingSquares() {
-		ArrayList<Integer> attackSquares = new ArrayList<Integer>();
+		
 		for(int directionIndex : directionIndices) {
 			if(Chess.NumSquaresToEdge[position][directionIndex] != 0) {
-				attackSquares.add(this.position + possibleDirections[directionIndex]);
+				attackSquaresList.add(this.position + possibleDirections[directionIndex]);
 			}			
 		}
-		return attackSquares.stream().mapToInt(Integer::intValue).toArray();
+		moveableSquares = attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
+		attackSquaresList.removeAll(attackSquaresList);
+		return attackSquares;
 	}
 	
 	//knight directions and queen directions combined
@@ -58,6 +117,7 @@ public class King extends Piece{
 		return GetCheckingPieceOpps();
 	}
 	
+	
 	int[] GetAllOpponentAttackSquares() {
 		ArrayList<Integer> squares = new ArrayList<Integer>();
 		for(Piece piece : Board.GetPiecesOfColor(!isWhite)) {
@@ -68,23 +128,26 @@ public class King extends Piece{
 		return squares.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
+	
+	ArrayList<Integer> squaresList = new ArrayList<Integer>();
+	int[] squares;
 	public void isInCheck() {
-		ArrayList<Integer> squares = new ArrayList<Integer>();
 		for(Piece piece : Board.GetPiecesOfColor(!isWhite)) {
 			for(int square : piece.GetAttackingSquares()) {
 				if(square == position) {
-					squares.add(square);
+					squaresList.add(square);
 					isInCheck = true;
 					attackingPiece = piece;
 				}
 			}
 		}
-		
-		if(squares.size() > 1) {
+		squares = squaresList.stream().mapToInt(Integer::intValue).toArray();
+		squaresList.removeAll(squaresList);
+		if(squares.length > 1) {
 			isInCheck = true;
 			doubleCheck = true;
 			return;
-		} else if(squares.size( )== 1) {
+		} else if(squares.length== 1) {
 			isInCheck = true;
 			return;
 		}
@@ -159,36 +222,18 @@ public class King extends Piece{
 	public boolean hasCastlingRightsShort = true;
 	
 	public void CastleShort() {
-		CheckShortCastlingRights();
-		if(hasCastlingRightsShort) {
-			int[] OppsAttackingSquares = GetAllOpponentAttackSquares();
-			for(int square : OppsAttackingSquares) {
-				if(isWhite && (square == Chess.E1 || square == Chess.F1 || square == Chess.G1)) {
-					return;
-				} else if(!isWhite && (square == Chess.E8 || square == Chess.F8 || square == Chess.G8)) {
-					return;
-				}
-			}
-			
-			if(isWhite && (Board.GetPositionGrid()[Chess.F1] != 0 || Board.GetPositionGrid()[Chess.G1] != 0)) {
-				return;
-			} else if(!isWhite && (Board.GetPositionGrid()[Chess.F8] != 0 || Board.GetPositionGrid()[Chess.G8] != 0)) {
-				return;
-			}
-			
-			if(isWhite) {
-				this.hasMoved = true;
-				rookShort.position = Chess.F1;
-				this.position = Chess.G1;
-				return;
-			}
+		if(isWhite) {
 			this.hasMoved = true;
-			rookShort.position = Chess.F8;
-			this.position = Chess.G8;
+			rookShort.position = Chess.F1;
+			this.position = Chess.G1;
+			return;
 		}
+		this.hasMoved = true;
+		rookShort.position = Chess.F8;
+		this.position = Chess.G8;
 	}
 	
-
+	
 	
 	void CheckShortCastlingRights() {
 	
@@ -199,37 +244,42 @@ public class King extends Piece{
 		hasCastlingRightsShort = false;
 	}
 	
+	boolean CanCastleShort() {
+		CheckShortCastlingRights();
+		if(hasCastlingRightsShort) {
+			int[] OppsAttackingSquares = GetAllOpponentAttackSquares();
+			for(int square : OppsAttackingSquares) {
+				if(isWhite && (square == Chess.E1 || square == Chess.F1 || square == Chess.G1)) {
+					return false;
+				} else if(!isWhite && (square == Chess.E8 || square == Chess.F8 || square == Chess.G8)) {
+					return false;
+				}
+			}
+			
+			if(isWhite && (Board.GetPositionGrid()[Chess.F1] != 0 || Board.GetPositionGrid()[Chess.G1] != 0)) {
+				return false;
+			} else if(!isWhite && (Board.GetPositionGrid()[Chess.F8] != 0 || Board.GetPositionGrid()[Chess.G8] != 0)) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	
 	//LONG CASTLING
 	public boolean hasCastlingRightsLong = true;
 	
 	public void CastleLong() {
-		CheckLongCastlingRights();
-		if(hasCastlingRightsLong) {
-			int[] OppsAttackingSquares = GetAllOpponentAttackSquares();
-			for(int square : OppsAttackingSquares) {
-				if(isWhite && (square == Chess.E1 || square == Chess.D1 || square == Chess.C1)) {
-					return;
-				} else if(!isWhite && (square == Chess.E8 || square == Chess.D8 || square == Chess.C8)) {
-					return;
-				}
-			}
-			
-			if(isWhite && (Board.GetPositionGrid()[Chess.D1] != 0|| Board.GetPositionGrid()[Chess.C1] != 0)) {
-				return;
-			} else if(!isWhite && (Board.GetPositionGrid()[Chess.D8] != 0|| Board.GetPositionGrid()[Chess.C8] != 0)) {
-				return;
-			}
-			
-			if(isWhite) {
-				this.hasMoved = true;
-				rookLong.position = Chess.D1;
-				this.position = Chess.C1;
-				return;
-			}
+		if(isWhite) {
 			this.hasMoved = true;
-			rookLong.position = Chess.D8;
-			this.position = Chess.C8;
+			rookLong.position = Chess.D1;
+			this.position = Chess.C1;
+			return;
 		}
+		this.hasMoved = true;
+		rookLong.position = Chess.D8;
+		this.position = Chess.C8;	
 	}
 	
 	void CheckLongCastlingRights() {
@@ -239,6 +289,29 @@ public class King extends Piece{
 		
 		hasCastlingRightsLong = false;
 	}
+	
+	boolean CanCastleLong() {
+		CheckLongCastlingRights();
+		if(hasCastlingRightsLong) {
+			int[] OppsAttackingSquares = GetAllOpponentAttackSquares();
+			for(int square : OppsAttackingSquares) {
+				if(isWhite && (square == Chess.E1 || square == Chess.D1 || square == Chess.C1)) {
+					return false;
+				} else if(!isWhite && (square == Chess.E8 || square == Chess.D8 || square == Chess.C8)) {
+					return false;
+				}
+			}
+			
+			if(isWhite && (Board.GetPositionGrid()[Chess.D1] != 0|| Board.GetPositionGrid()[Chess.C1] != 0)) {
+				return false;
+			} else if(!isWhite && (Board.GetPositionGrid()[Chess.D8] != 0|| Board.GetPositionGrid()[Chess.C8] != 0)) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	
 	King(int startingPos, boolean color) {
 		position = startingPos;
@@ -258,8 +331,6 @@ public class King extends Piece{
 			rookLong = Board.FindPieceByPosition(Chess.A8);
 		}
 		
-		//to update attacking squares
-		Board.addPiece(this);
-		GetMoveableSquares();
+		Model.pieces.add(this);
 	}
 }

@@ -1,19 +1,18 @@
 package GUITest;
 
 import java.awt.BorderLayout;
+
 import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.Image;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-
-import javax.swing.BorderFactory;
+import java.io.FileInputStream;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -26,10 +25,11 @@ import ControllTest.Controlla;
 import chesspresso.Chess;
 
 public class Guihihi {
-	ArrayList<PieceGUI> pieces = new ArrayList<PieceGUI>();
+	public static ArrayList<PieceGUI> activePieces = new ArrayList<PieceGUI>();
+	public static ArrayList<PieceGUI> pieces = new ArrayList<PieceGUI>();
 	BufferedImage img;
 	
-	PieceGUI selectedPiece;
+	public static PieceGUI selectedPiece;
 	
 	public JPanel bishop = new PieceGUI(Chess.C1, 1);
 	public JPanel bishop1 = new PieceGUI(Chess.F1, 1);
@@ -64,8 +64,107 @@ public class Guihihi {
 	public JPanel king = new PieceGUI(Chess.E1, 5);
 	public JPanel king1 = new PieceGUI(Chess.E8, 11);
 	
-	public PieceGUI findPieceByPosition(int position) {
-		for(PieceGUI piece : pieces) {
+	//FOR LOAD POSITION
+	public JPanel queen2 = new PieceGUI(-1, 3);
+	public JPanel queen3 = new PieceGUI(-1, 9);
+	public JPanel queen4 = new PieceGUI(-1, 3);
+	public JPanel queen5 = new PieceGUI(-1, 9);
+	public JPanel queen6 = new PieceGUI(-1, 3);
+	public JPanel queen7 = new PieceGUI(-1, 9);
+	public JPanel queen8 = new PieceGUI(-1, 3);
+	public JPanel queen9 = new PieceGUI(-1, 9);
+	public JPanel queen10 = new PieceGUI(-1, 3);
+	public JPanel queen11 = new PieceGUI(-1, 9);
+	public JPanel queen12 = new PieceGUI(-1, 3);
+	public JPanel queen13 = new PieceGUI(-1, 9);
+	public JPanel queen14 = new PieceGUI(-1, 3);
+	public JPanel queen15 = new PieceGUI(-1, 9);
+	public JPanel queen16 = new PieceGUI(-1, 3);
+	public JPanel queen17 = new PieceGUI(-1, 9);
+	
+	public JPanel rook4 = new PieceGUI(-1, 2);
+	public JPanel rook5 = new PieceGUI(-1, 8);
+	public JPanel rook6 = new PieceGUI(-1, 2);
+	public JPanel rook7 = new PieceGUI(-1, 8);
+	public JPanel rook8 = new PieceGUI(-1, 2);
+	public JPanel rook9 = new PieceGUI(-1, 8);
+	public JPanel rook10 = new PieceGUI(-1, 2);
+	public JPanel rook11 = new PieceGUI(-1, 8);
+	public JPanel rook12 = new PieceGUI(-1, 2);
+	public JPanel rook13 = new PieceGUI(-1, 8);
+	public JPanel rook14 = new PieceGUI(-1, 2);
+	public JPanel rook15 = new PieceGUI(-1, 8);
+	public JPanel rook16 = new PieceGUI(-1, 2);
+	public JPanel rook17 = new PieceGUI(-1, 8);
+	public JPanel rook18 = new PieceGUI(-1, 2);
+	public JPanel rook19 = new PieceGUI(-1, 8);
+	
+	public JPanel knight4 = new PieceGUI(-1, 0);
+	public JPanel knight5 = new PieceGUI(-1, 6);
+	public JPanel knight6 = new PieceGUI(-1, 0);
+	public JPanel knight7 = new PieceGUI(-1, 6);
+	public JPanel knight8 = new PieceGUI(-1, 0);
+	public JPanel knight9 = new PieceGUI(-1, 6);
+	public JPanel knight10 = new PieceGUI(-1, 0);
+	public JPanel knight11 = new PieceGUI(-1, 6);
+	public JPanel knight12 = new PieceGUI(-1, 0);
+	public JPanel knight13 = new PieceGUI(-1, 6);
+	public JPanel knight14 = new PieceGUI(-1, 0);
+	public JPanel knight15 = new PieceGUI(-1, 6);
+	public JPanel knight16 = new PieceGUI(-1, 0);
+	public JPanel knight17 = new PieceGUI(-1, 6);
+	public JPanel knight18 = new PieceGUI(-1, 0);
+	public JPanel knight19 = new PieceGUI(-1, 6);
+	
+	public JPanel bishop4 = new PieceGUI(-1, 1);
+	public JPanel bishop5 = new PieceGUI(-1, 7);
+	public JPanel bishop6 = new PieceGUI(-1, 1);
+	public JPanel bishop7 = new PieceGUI(-1, 7);
+	public JPanel bishop8 = new PieceGUI(-1, 1);
+	public JPanel bishop9 = new PieceGUI(-1, 7);
+	public JPanel bishop10 = new PieceGUI(-1, 1);
+	public JPanel bishop11 = new PieceGUI(-1, 7);
+	public JPanel bishop12 = new PieceGUI(-1, 1);
+	public JPanel bishop13 = new PieceGUI(-1, 7);
+	public JPanel bishop14 = new PieceGUI(-1, 1);
+	public JPanel bishop15 = new PieceGUI(-1, 7);
+	public JPanel bishop16 = new PieceGUI(-1, 1);
+	public JPanel bishop17 = new PieceGUI(-1, 7);
+	public JPanel bishop18 = new PieceGUI(-1, 1);
+	public JPanel bishop19 = new PieceGUI(-1, 7);
+
+	static JFrame frame = new JFrame("Chess.com");
+	JPanel panelSouth = new JPanel();
+	
+	JLabel selectInstruction = new JLabel("Select Piece");
+	JTextField selectText = new JTextField(10);
+	JButton selectButton = new JButton("Select");
+	
+	JLabel moveInstruction = new JLabel("                 Move Piece");
+	JTextField moveText = new JTextField(10);
+	JButton moveButton = new JButton("Move");
+	
+	
+	
+	JPanel panelNorth = new JPanel();
+	
+	JLabel Title = new JLabel("Chess.com!!! (but worse)");
+	
+	JLayeredPane panelWest = new JLayeredPane();
+	
+	JLabel explanation = new JLabel("<html>To select piece, type in piece position. example: e4 UNCAPITALIZED!!!. <br/>For moving its the same: type in piece position</html>");
+	JLabel fenText = new JLabel("Load FEN: ");
+	JTextField fenTextField = new JTextField("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 40);
+	JButton fenButton = new JButton("Load");
+	
+	public static JLayeredPane bigcenterPanel = new JLayeredPane();
+	JPanel chessBoard = new JPanel();
+
+	public static HighlightedSquares h = new HighlightedSquares();
+	JLabel board;
+	
+	public static PieceGUI findPieceByPosition(int position) {
+		for(PieceGUI piece : activePieces) {
 			if(piece.position == position) {
 				return piece;
 			}
@@ -73,85 +172,111 @@ public class Guihihi {
 		return null;
 	}
 	
-	public void removePiece(PieceGUI piece) {
+	public void MovePiece(int movePosition, PieceGUI piece) throws IOException
+	{
+		if(piece == null) {
+			return;
+		}
+		Controlla.MovePiece(piece, movePosition);
+		
+		selectedPiece = null;
+		h.legalMoves = new int[0];
+		h.repaint();
 		
 	}
 	
+	public static void CapturePiece(PieceGUI capturedPiece) {
+		if(capturedPiece == null) {
+			return;
+		}
+		activePieces.remove(capturedPiece);
+		bigcenterPanel.remove(capturedPiece);
+	}
+	
+	static char[] fenChars;
+	static int position = 56;
+	public static void LoadPosition(String fen) {
+		fenChars = fen.toCharArray();
+		for(PieceGUI p : activePieces) {
+			bigcenterPanel.remove(p);
+		}
+		bigcenterPanel.repaint();
+		activePieces.removeAll(activePieces);
+		for(char ch2 : fenChars) {
+			System.out.println(ch2);
+		}
+		System.out.println(Controlla.ConvertCharToIndex('n'));
+		for(char ch : fenChars) {
+			if(ch == ' ') {
+				
+			} else if(Chess.IsInListChr(Chess.pieceChars, ch)) {
+				for(PieceGUI piecegui : pieces) {
+					if(piecegui.pieceIndex == Controlla.ConvertCharToIndex(ch) && !activePieces.contains(piecegui)) {
+						piecegui.MoveTo(position);
+						System.out.println("ITS THIS PIECE: " + ch + " ON THIS POSITION " + piecegui.position);
+						activePieces.add(piecegui);
+						bigcenterPanel.add(piecegui, JLayeredPane.MODAL_LAYER);
+						position += 1;
+						break;
+					}
+				}
+			} else if(ch == '/') {
+				position -= 16;
+			} else if(ch == 'w' || ch == 'b'){
+				break;
+			}  else {
+				position +=  Integer.parseInt(String.valueOf(ch));
+			}
+			
+		}
+		bigcenterPanel.repaint();
+		position = 56;
+	}
+	
 	public Guihihi() throws IOException {
-		JFrame frame = new JFrame("JIgger");
-		JPanel panelSouth = new JPanel();
 		
-		JLabel selectInstruction = new JLabel("Select Piece");
-		JTextField selectText = new JTextField(10);
-		JButton selectButton = new JButton("Select");
-		
-		JLabel moveInstruction = new JLabel("                 Move Piece");
-		JTextField moveText = new JTextField(10);
-		JButton moveButton = new JButton("Move");
-		
-		
-		
-		JPanel panelNorth = new JPanel();
-		
-		JLabel Title = new JLabel("Chess.com!!! (but worse)");
-		
-		
-		
-		JPanel panelWest = new JPanel();
-		
-		JLabel explanation = new JLabel("<html>To select piece, type in piece position. example: e4 UNCAPITALIZED!!!. <br/>For moving its the same: type in piece position</html>");
-		
-		
-		JLayeredPane bigcenterPanel = new JLayeredPane();
-		JPanel chessBoard = new JPanel();
 		chessBoard.setBounds(0,0,1000,1000);
 	    chessBoard.setBackground(Color.black);
 	    
-	    
-	    
-		pieces.add((PieceGUI) bishop);
-		pieces.add((PieceGUI) bishop1);
-		pieces.add((PieceGUI) bishop2);
-		pieces.add((PieceGUI) bishop3);
-		pieces.add((PieceGUI) knight);
-		pieces.add((PieceGUI) knight1);
-		pieces.add((PieceGUI) knight2);
-		pieces.add((PieceGUI) knight3);
-		pieces.add((PieceGUI) rook);
-		pieces.add((PieceGUI) rook1);
-		pieces.add((PieceGUI) rook2);
-		pieces.add((PieceGUI) rook3);
-		pieces.add((PieceGUI) pawn);
-		pieces.add((PieceGUI) pawn1);
-		pieces.add((PieceGUI) pawn2);
-		pieces.add((PieceGUI) pawn3);
-		pieces.add((PieceGUI) pawn4);
-		pieces.add((PieceGUI) pawn5);
-		pieces.add((PieceGUI) pawn6);
-		pieces.add((PieceGUI) pawn7);
-		pieces.add((PieceGUI) pawn8);
-		pieces.add((PieceGUI) pawn9);
-		pieces.add((PieceGUI) pawn10);
-		pieces.add((PieceGUI) pawn11);
-		pieces.add((PieceGUI) pawn12);
-		pieces.add((PieceGUI) pawn13);
-		pieces.add((PieceGUI) pawn14);
-		pieces.add((PieceGUI) pawn15);
-		pieces.add((PieceGUI) queen);
-		pieces.add((PieceGUI) queen1);
-		pieces.add((PieceGUI) king);
-		pieces.add((PieceGUI) king1);
+		activePieces.add((PieceGUI) bishop);
+		activePieces.add((PieceGUI) bishop1);
+		activePieces.add((PieceGUI) bishop2);
+		activePieces.add((PieceGUI) bishop3);
+		activePieces.add((PieceGUI) knight);
+		activePieces.add((PieceGUI) knight1);
+		activePieces.add((PieceGUI) knight2);
+		activePieces.add((PieceGUI) knight3);
+		activePieces.add((PieceGUI) rook);
+		activePieces.add((PieceGUI) rook1);
+		activePieces.add((PieceGUI) rook2);
+		activePieces.add((PieceGUI) rook3);
+		activePieces.add((PieceGUI) pawn);
+		activePieces.add((PieceGUI) pawn1);
+		activePieces.add((PieceGUI) pawn2);
+		activePieces.add((PieceGUI) pawn3);
+		activePieces.add((PieceGUI) pawn4);
+		activePieces.add((PieceGUI) pawn5);
+		activePieces.add((PieceGUI) pawn6);
+		activePieces.add((PieceGUI) pawn7);
+		activePieces.add((PieceGUI) pawn8);
+		activePieces.add((PieceGUI) pawn9);
+		activePieces.add((PieceGUI) pawn10);
+		activePieces.add((PieceGUI) pawn11);
+		activePieces.add((PieceGUI) pawn12);
+		activePieces.add((PieceGUI) pawn13);
+		activePieces.add((PieceGUI) pawn14);
+		activePieces.add((PieceGUI) pawn15);
+		activePieces.add((PieceGUI) queen);
+		activePieces.add((PieceGUI) queen1);
+		activePieces.add((PieceGUI) king);
+		activePieces.add((PieceGUI) king1);
 		
-		HighlightedSquares h = new HighlightedSquares();
 		h.setBounds(0,0,1000,1000);
 		h.setOpaque(false);
 		
-		//JPanel chessBoard = new JPanel();
-		img = ImageIO.read(getClass().getResource("/images/board.jpg"));
-		JLabel board = new JLabel(new ImageIcon(img));
-		//textField.setSize(50, 500);
-		//panel.setBorder(BorderFactory.createEmptyBorder(10,30,30,10));
-		//panel.setLayout(new GridLayout(0,1));
+		img = ImageIO.read(new FileInputStream("images/Images/board.jpg"));
+		board = new JLabel(new ImageIcon(img));
+		
 		frame.setSize(2000,1000);
 		
 		panelSouth.add(selectInstruction);
@@ -164,23 +289,34 @@ public class Guihihi {
 		
 		panelNorth.add(Title);
 		
-		panelWest.add(explanation);
+		panelWest.setPreferredSize(new Dimension(800,0));
+		JPanel testr = new JPanel();
+		JPanel testr2 = new JPanel();
+		testr.setBounds(0,0,500,100);
+		testr2.setBounds(0,100,800,100);
+		testr.setBackground(Color.RED);
+		testr.add(explanation);
+		testr2.add(fenText);
+		testr2.add(fenTextField);
+		testr2.add(fenButton);
+		panelWest.add(testr);
+		panelWest.add(testr2);
+//		panelWest.add(explanation);
+//		panelWest.add(fenText);
 		
 		chessBoard.add(board);
 		
 		bigcenterPanel.add(chessBoard,JLayeredPane.DEFAULT_LAYER);
 		bigcenterPanel.add(h, JLayeredPane.PALETTE_LAYER);
 		
-		for(PieceGUI piece : pieces) {
+		for(PieceGUI piece : activePieces) {
 			bigcenterPanel.add(piece, JLayeredPane.MODAL_LAYER);
 		}
 		
 		frame.add(panelSouth, BorderLayout.SOUTH);
-		frame.add(panelNorth, BorderLayout.NORTH);
 		frame.add(panelWest, BorderLayout.WEST);
+		frame.add(panelNorth, BorderLayout.NORTH);
 		frame.add(bigcenterPanel, BorderLayout.CENTER);
-		
-		
 		
 		//SELECT
 		selectButton.addActionListener(new ActionListener() {
@@ -202,33 +338,23 @@ public class Guihihi {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(selectedPiece == null) {
-					return;
+				try {
+					MovePiece(Chess.strToSqi(moveText.getText()), selectedPiece);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				int newPosition = Chess.strToSqi(moveText.getText());
-				int MoveablePosition = Controlla.GetMoveSquare(selectedPiece, newPosition);
-				
-				if(MoveablePosition == selectedPiece.position) {
-					System.out.println("suptid jgiar");
-					System.out.println(Chess.sqiToStr(selectedPiece.position));
-					return;
-				}
-				
-				
-				PieceGUI CapturablePiece = findPieceByPosition(newPosition);
-				
-				//Capture piece
-				if(CapturablePiece != null) {
-					pieces.remove(CapturablePiece);
-					bigcenterPanel.remove(CapturablePiece);
-				}
-				selectedPiece.MoveTo(newPosition);
-				selectedPiece = null;
-				h.legalMoves = new int[0];
-				h.repaint();
-			}
+			};
 			
 		});
+		
+		fenButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Controlla.LoadPosition(fenTextField.getText());
+			};
+		});
+		
 		//frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);

@@ -15,8 +15,6 @@ public class Queen extends Piece {
 			stone = Chess.BLACK_QUEEN;
 		}
 		
-		Board.addPiece(this);
-		//to update attacking squares
-		GetMoveableSquares();
+		Model.pieces.add(this);
 	}
 }
