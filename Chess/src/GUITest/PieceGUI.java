@@ -1,5 +1,9 @@
 package GUITest;
 
+import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +20,7 @@ public class PieceGUI extends JPanel {
 	public int yposPixels = 15;
 	public int position;
 	public int pieceIndex;
+	Rectangle2D area;
 	BufferedImage sprite;
 	JLabel spriteDisplay = new JLabel();
 	//
@@ -28,8 +33,9 @@ public class PieceGUI extends JPanel {
 	
 	public void MoveTo(int position) {
 		this.position = position;
-		xposPixels = 75 + Chess.sqiToCol(position) * 78;
-		yposPixels = 15 + (7 -Chess.sqiToRow(position)) * 78;
+		xposPixels = 184 + Chess.sqiToCol(position) * 79;
+		yposPixels = 36 + (7 -Chess.sqiToRow(position)) * 78;
+		area = new Rectangle2D.Double(xposPixels, yposPixels,78,78);
 		this.setLocation(xposPixels, yposPixels);
 		
 	}
@@ -50,15 +56,15 @@ public class PieceGUI extends JPanel {
 		spriteURL = sprites[pieceIndex];
 //		InputStream boardInputStream = this.getClass().getResourceAsStream(spriteURL);
 //		sprite = ImageIO.read(boardInputStream);
-		
      	sprite = ImageIO.read(new FileInputStream(spriteURL));
 		spriteDisplay.setIcon(new ImageIcon(sprite));
-		 add(spriteDisplay);
-		 position = startPosition;
-		 xposPixels = 75 + Chess.sqiToCol(startPosition) * 78;
-		 yposPixels = 15 + (7 -Chess.sqiToRow(startPosition)) * 78;
-		 this.setOpaque(false);
-		 this.setBounds(xposPixels, yposPixels,300,300);
+		add(spriteDisplay);
+		position = startPosition;
+		xposPixels = 184 + Chess.sqiToCol(startPosition) * 79;
+		yposPixels = 36 + (7 -Chess.sqiToRow(startPosition)) * 78;
+		this.setOpaque(false);
+		this.setBounds(xposPixels, yposPixels,78,78);
+		area = new Rectangle2D.Double(xposPixels, yposPixels,78,78);
 		Guihihi.pieces.add(this);
 	}
 }

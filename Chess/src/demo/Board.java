@@ -152,6 +152,7 @@ public class Board {
 				((Pawn) piece).enpassantableSquare = -1;
 			}
 		}
+		Gamemanager.positionsFen.removeAll(Gamemanager.positionsFen);
 		
 		activePieces.removeAll(activePieces);
 		fenCharsBasic = fen.substring(0 ,new String(fenChars).indexOf(' ')).toCharArray();

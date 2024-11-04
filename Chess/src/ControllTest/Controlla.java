@@ -96,11 +96,16 @@ public class Controlla {
 	
 	static ArrayList<PieceGUI> pieceguisUpdated = new ArrayList<PieceGUI>();
 	public static void UpdateAllPieceGUIPosition() {
+		for(PieceGUI piecegui : Guihihi.pieces) {
+			Guihihi.CapturePiece(piecegui);
+		}
+		
 		for(Piece piece : Board.activePieces) {
 			for(PieceGUI piecegui : Guihihi.pieces) {
 				if(!pieceguisUpdated.contains(piecegui) && piecegui.pieceIndex == ConvertStoneToIndex(piece.stone)) {
 					pieceguisUpdated.add(piecegui);
 					Guihihi.bigcenterPanel.add(piecegui, JLayeredPane.MODAL_LAYER);
+					Guihihi.activePieces.add(piecegui);
 					piecegui.MoveTo(piece.position);
 					break;
 				}
@@ -108,11 +113,7 @@ public class Controlla {
 			}
 		}
 		
-		for(PieceGUI piecegui : Guihihi.pieces) {
-			if(!pieceguisUpdated.contains(piecegui)) {
-				Guihihi.CapturePiece(piecegui);
-			}
-		}
+		
 		pieceguisUpdated.removeAll(pieceguisUpdated);
 	}
 

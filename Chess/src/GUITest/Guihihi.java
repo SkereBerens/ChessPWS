@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -24,7 +26,7 @@ import javax.swing.JTextField;
 import ControllTest.Controlla;
 import chesspresso.Chess;
 
-public class Guihihi {
+public class Guihihi implements MouseListener {
 	public static ArrayList<PieceGUI> activePieces = new ArrayList<PieceGUI>();
 	public static ArrayList<PieceGUI> pieces = new ArrayList<PieceGUI>();
 	BufferedImage img;
@@ -152,7 +154,7 @@ public class Guihihi {
 	
 	JLayeredPane panelWest = new JLayeredPane();
 	
-	JLabel explanation = new JLabel("<html>To select piece, type in piece position. example: e4 UNCAPITALIZED!!!. <br/>For moving its the same: type in piece position</html>");
+	JLabel explanation = new JLabel("<html>Select piece by clicking it. <br/>Click red highlighted square to move there <br/>Type in FEN string to load position</html>");
 	JLabel fenText = new JLabel("Load FEN: ");
 	JTextField fenTextField = new JTextField("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 40);
 	JButton fenButton = new JButton("Load");
@@ -172,7 +174,7 @@ public class Guihihi {
 		return null;
 	}
 	
-	public void MovePiece(int movePosition, PieceGUI piece) throws IOException
+	public static void MovePiece(int movePosition, PieceGUI piece) throws IOException
 	{
 		if(piece == null) {
 			return;
@@ -182,7 +184,18 @@ public class Guihihi {
 		selectedPiece = null;
 		h.legalMoves = new int[0];
 		h.repaint();
+		//h.HighlightSquares();
 		
+	}
+	
+	public static void SelectPiece(PieceGUI piece) {
+		selectedPiece = piece;
+		if(selectedPiece == null) {
+			return;
+		}
+		h.legalMoves = Controlla.GetLegalMoves(selectedPiece);
+		h.repaint();
+		//h.HighlightSquares();
 	}
 	
 	public static void CapturePiece(PieceGUI capturedPiece) {
@@ -309,6 +322,7 @@ public class Guihihi {
 		bigcenterPanel.add(chessBoard,JLayeredPane.DEFAULT_LAYER);
 		bigcenterPanel.add(h, JLayeredPane.PALETTE_LAYER);
 		
+		
 		for(PieceGUI piece : activePieces) {
 			bigcenterPanel.add(piece, JLayeredPane.MODAL_LAYER);
 		}
@@ -355,12 +369,63 @@ public class Guihihi {
 			};
 		});
 		
+		for(PieceGUI piece : pieces) {
+			piece.addMouseListener(this);
+		}
+		h.addMouseListener(this);
+		
 		//frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		//panel.setBorder(BorderFactory.createEmptyBorder(1,1,1,1));
 	}
-	
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if(e.getSource().getClass() == HighlightedSquares.class) {
+			h.MoveToHighlightedSquare(e);
+		} else if(e.getSource().getClass() == PieceGUI.class) {
+			for(int legalMove : h.legalMoves) {
+				if(legalMove == ((PieceGUI) e.getSource()).position) {
+					try {
+						MovePiece(legalMove , selectedPiece);
+						return;
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
+			SelectPiece(((PieceGUI) e.getSource()));
+		}
+		
+		
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 

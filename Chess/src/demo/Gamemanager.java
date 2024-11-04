@@ -48,7 +48,7 @@ public class Gamemanager {
 		
 	}
 	
-	static ArrayList<String> positionsFen = new ArrayList<String>();
+	public static ArrayList<String> positionsFen = new ArrayList<String>();
 	static int equalPositions = 0;
 	static String currentPositionFen;
 	public static boolean ThreefoldRepetition() {

@@ -49,14 +49,14 @@ public class ChessApp {
 //		gui.MovePiece(Chess.E8,Guihihi.findPieceByPosition(Chess.E7));
 		
 		
-		gui.MovePiece(Chess.E4,gui.findPieceByPosition(Chess.E2));
-		gui.MovePiece(Chess.F5,gui.findPieceByPosition(Chess.F7));
-		gui.MovePiece(Chess.F5,gui.findPieceByPosition(Chess.E4));
-		gui.MovePiece(Chess.G5,gui.findPieceByPosition(Chess.G7));
-		gui.MovePiece(Chess.G6,gui.findPieceByPosition(Chess.F5));
-		gui.MovePiece(Chess.A5,gui.findPieceByPosition(Chess.A7));
-		gui.MovePiece(Chess.H7,gui.findPieceByPosition(Chess.G6));
-		gui.MovePiece(Chess.A4,gui.findPieceByPosition(Chess.A5));
+//		gui.MovePiece(Chess.E4,gui.findPieceByPosition(Chess.E2));
+//		gui.MovePiece(Chess.F5,gui.findPieceByPosition(Chess.F7));
+//		gui.MovePiece(Chess.F5,gui.findPieceByPosition(Chess.E4));
+//		gui.MovePiece(Chess.G5,gui.findPieceByPosition(Chess.G7));
+//		gui.MovePiece(Chess.G6,gui.findPieceByPosition(Chess.F5));
+//		gui.MovePiece(Chess.A5,gui.findPieceByPosition(Chess.A7));
+//		gui.MovePiece(Chess.H7,gui.findPieceByPosition(Chess.G6));
+//		gui.MovePiece(Chess.A4,gui.findPieceByPosition(Chess.A5));
 		
 	}
 }
