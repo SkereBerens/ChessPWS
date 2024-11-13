@@ -61,8 +61,8 @@ public class Gamemanager {
 			}
 		}
 		
-		System.out.println(equalPositions + " Repetitions");
-		System.out.println("/////////////////////////");
+//		System.out.println(equalPositions + " Repetitions");
+//		System.out.println("/////////////////////////");
 		
 		if(equalPositions >= 3) {
 			equalPositions = 0;

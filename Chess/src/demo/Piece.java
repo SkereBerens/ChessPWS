@@ -10,7 +10,7 @@ public class Piece {
 	public int stone;
 	public int position;
 	public boolean isWhite;
-	public boolean isPinned;
+	public boolean isPinned = false;
 	public boolean captured = false;
 	//for castling
 	public boolean hasMoved = false;
@@ -60,18 +60,39 @@ public class Piece {
 	//TEMPORARY MOVE ORDER THING
 	public static int ply = 1;
 	public static int fullMoves = 1;
+	public int previousPosition = -1;
+	public String previousPositionFENAddOn;
+	public Piece capturedPiece;
+	
 	public void MoveTo(int position) throws IOException {
+		//previousPosition = null;
 		if(!captured) {
+			king = ((King)Board.GetKing(stone));
+			attackingPiece = king.GetCheckingPiece();
 				for(int square : GetLegalMoves()) {
 					if(square == position) {
+						previousPositionFENAddOn = Board.GetFENAdvancedAddOn();
 						// 0 want dan staat er niemand
 						boolean isOppositeColor = Board.GetPositionGrid()[position] != 0 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
 						if(isOppositeColor) {
 							Capture(position);
 							//-1 because MiscMoveFunctions adds 1
 							movesTilDraw = -1;
+						} else {
+							capturedPiece = null;
 						}
-						Controlla.MovePieceGUI(this, position);
+						
+						
+						
+						for(Piece p : Board.activePieces) {
+							p.previousPosition = p.position;
+						}
+						
+						previousPosition = this.position;
+						
+						
+						
+						//Controlla.MovePieceGUI(this, position);
 						this.position = position;
 						movesTilDraw++;
 						MiscMoveFunctions();
@@ -80,6 +101,42 @@ public class Piece {
 				}
 			
 		}
+	}
+	
+	//for testing
+	public void RevertMove(int previousPosition, Piece capturedPiece, String previousPositionFENAddOn, int previousPositionRookLong, int previousPositionRookShort) {
+//		System.out.println(position);
+		
+		for(Piece piece : Board.activePieces) {
+			piece.isPinned = false;
+			piece.king = null;
+			piece.attackingPiece = null;
+			piece.hasMoved = false;
+			if(Chess.stoneToPiece(piece.stone) == 6) {
+				((King) piece).isInCheck = false;
+				((King) piece).doubleCheck = false;
+				((King) piece).attackingPiece = null;
+				((King) piece).hasCastlingRightsShort = false;
+				((King) piece).hasCastlingRightsLong = false;
+			}
+			
+			if(Chess.stoneToPiece(piece.stone) == 5) {
+				((Pawn) piece).enpassantableSquare = -1;
+				((Pawn) piece).isPinnedForEnPassant = false;
+			}
+		}
+		Gamemanager.positionsFen.removeAll(Gamemanager.positionsFen);
+		
+		if(Chess.stoneToPiece(stone) == 6) {
+			((King) this).rookLong.position = previousPositionRookLong;
+			((King) this).rookShort.position = previousPositionRookShort;
+		}
+		this.position = previousPosition;
+		
+		UnCapturePiece(capturedPiece);
+		Board.updatePosition();
+		Board.LoadFENAdvancedAddOn(previousPositionFENAddOn);
+		Board.updatePosition();
 	}
 	
 	//for fifty move rule
@@ -94,6 +151,7 @@ public class Piece {
 			
 			//make enemy piece not enpassantable
 			if(opps.stone ==  Math.signum(stone) * Chess.WHITE_PAWN) {
+				((Pawn) opps).isPinnedForEnPassant = false;
 				((Pawn) opps).enpassantableSquare = -1;
 			}
 		}
@@ -114,15 +172,15 @@ public class Piece {
 		if(!isWhite) {
 			fullMoves++;
 		}
-		System.out.println(Board.GetFENAdvanced());
-		Gamemanager.GetGameOutcome();
+		//Gamemanager.GetGameOutcome();
+//		System.out.println(Board.GetFENAdvanced());
 	}
 	
 	ArrayList<Integer> attackSquaresList = new ArrayList<Integer>();
 	int[] attackSquares = {};
 	public int attackDirectionIndex;
 	public int[] GetAttackingSquares() {
-		
+		attackSquaresList.removeAll(attackSquaresList);
 		if(!captured) {
 			for(int directionIndex : directionIndices) {
 				for(int i = 1; i < Chess.NumSquaresToEdge[this.position][directionIndex] + 1; i++) {
@@ -137,15 +195,14 @@ public class Piece {
 			}
 		}
 		
-		attackSquares = attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
-		attackSquaresList.removeAll(attackSquaresList);
-		return attackSquares;
+		return attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
 	//for slidey pieces (bishop, rook, queen)
 	ArrayList<Integer> moveableSquaresList = new ArrayList<Integer>();
 	int[] moveableSquares;
 	int[] GetMoveableSquares() {
+		moveableSquaresList.removeAll(moveableSquaresList);
 		if(!captured && !isPinned) {
 			for(int directionIndex : directionIndices) {
 				for(int i = 1; i < Chess.NumSquaresToEdge[this.position][directionIndex] + 1; i++) {
@@ -175,21 +232,27 @@ public class Piece {
 				}
 			}
 		}
-		moveableSquares = moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();;
-		moveableSquaresList.removeAll(moveableSquaresList);
-		return moveableSquares;
+		
+		return moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	//CHECKS
 	//
 	//
 	int[] blocksquaresCheck;
 	int[] GetMoveableSquaresInCheck() {
-		
+		moveableSquaresList.removeAll(moveableSquaresList);
 		blocksquaresCheck = GetBlockSquares();
 		if(!captured && !isPinned) {
 			for(int directionIndex : directionIndices) {
 				for(int i = 1; i < Chess.NumSquaresToEdge[this.position][directionIndex] + 1; i++) {
 					if(Math.signum(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * i]) == Math.signum(stone)) {
+						break;
+					}
+					if(Math.signum(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * i]) == -Math.signum(stone)) {
+						if(this.position + possibleDirections[directionIndex] * i != attackingPiece.position) {
+							break;
+						}
+						moveableSquaresList.add(this.position +  possibleDirections[directionIndex] * i);
 						break;
 					}
 					if(Chess.IsInList(blocksquaresCheck, this.position +  possibleDirections[directionIndex] * i)) {
@@ -198,9 +261,7 @@ public class Piece {
 				}
 			}
 		}
-		moveableSquares = moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
-		moveableSquaresList.removeAll(moveableSquaresList);
-		return moveableSquares;
+		return moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
 	
@@ -210,7 +271,7 @@ public class Piece {
 	int attackDirection;
 	//Gets squares where you block or capture the checking piece
 	int[] GetBlockSquares() {
-		
+		blockSquaresList.removeAll(blockSquaresList);
 		if(attackingPiece.stone == Math.signum(stone) * Chess.WHITE_QUEEN
 		|| attackingPiece.stone == Math.signum(stone) * Chess.WHITE_BISHOP
 		|| attackingPiece.stone == Math.signum(stone) * Chess.WHITE_ROOK) {
@@ -225,9 +286,8 @@ public class Piece {
 		} else {
 			blockSquaresList.add(attackingPiece.position);
 		}
-		blockSquares = blockSquaresList.stream().mapToInt(Integer::intValue).toArray();
-		blockSquaresList.removeAll(blockSquaresList);
-		return blockSquares;
+		
+		return blockSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
 	//PINS
@@ -240,12 +300,27 @@ public class Piece {
 				for(int i = 1; i < Chess.NumSquaresToEdge[this.position][directionIndex] + 1; i++) {
 					if(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * i] == 0) {
 						//continue, cuz empty
+					} else if (Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * i] == Math.signum(stone) * Chess.WHITE_PAWN && Chess.NumSquaresToEdge[this.position + possibleDirections[directionIndex] * i][directionIndex] != 0 && Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * (i + 1)] == Math.signum(stone) * Chess.BLACK_PAWN){
+						for(int j = 1; j < Chess.NumSquaresToEdge[this.position + possibleDirections[directionIndex] * i][directionIndex] + 1; j++) {
+							
+							if(this.position + possibleDirections[directionIndex] * i + possibleDirections[directionIndex] * j == Board.GetKing(-stone).position) {
+								((Pawn) Board.FindPieceByPosition(this.position + possibleDirections[directionIndex] * i)).isPinnedForEnPassant = true;
+							}
+						}
+						break;
+					} else if(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * i] == Math.signum(stone) * Chess.BLACK_PAWN && Chess.NumSquaresToEdge[this.position + possibleDirections[directionIndex] * i][directionIndex] != 0&& Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * (i + 1)] == Math.signum(stone) * Chess.WHITE_PAWN) {
+						for(int j = 1; j < Chess.NumSquaresToEdge[this.position + possibleDirections[directionIndex] * i][directionIndex] + 1; j++) {
+							if(this.position + possibleDirections[directionIndex] * i + possibleDirections[directionIndex] * j == Board.GetKing(-stone).position) {
+								((Pawn) Board.FindPieceByPosition(this.position + possibleDirections[directionIndex] * (i + 1))).isPinnedForEnPassant = true;
+							}
+						}
+						break;
 					} else if(Chess.stoneToColor(Board.GetPositionGrid()[this.position + possibleDirections[directionIndex] * i]) == Chess.stoneToColor(stone)){
-						
 						break;
 					} else {
 						for(int j = 1; j < Chess.NumSquaresToEdge[this.position + possibleDirections[directionIndex] * i][directionIndex] + 1; j++) {
 							if(this.position + possibleDirections[directionIndex] * i + possibleDirections[directionIndex] * j == Board.GetKing(-stone).position) {
+								
 								pinnedPiece = Board.FindPieceByPosition(this.position + possibleDirections[directionIndex] * i);
 								pinnedPiece.isPinned = true;
 								pinnedPiece.directionIndicesIfPinned = new int[] {directionIndex, Chess.GetOppositeDirectionIndex(directionIndex)};
@@ -286,8 +361,21 @@ public class Piece {
 		return new int[] {};
 	}
 	
+	
 	void Capture(int position) {
-		Controlla.CapturePiece(Board.FindPieceByPosition(position));
+		capturedPiece = Board.FindPieceByPosition(position);
+		//Controlla.CapturePiece(Board.FindPieceByPosition(position));
 		Board.RemovePiece(position);
+	}
+	
+	void UnCapturePiece(Piece p) {
+		if(p == null) {
+			return;
+		}
+		if(Chess.stoneToPiece(p.stone) == 6) {
+			System.out.println("WATTESIGHMAAAA");
+		}
+		Board.addPiece(p);
+		p.captured = false;
 	}
 }

@@ -9,30 +9,43 @@ import chesspresso.Chess;
 public class King extends Piece{
 	boolean isInCheck = false;
 	boolean doubleCheck = false;
-	Piece attackingPiece;
+//	Piece attackingPiece;
 	Piece rookShort;
 	Piece rookLong;
 	
 	@Override
 	public void MoveTo(int position) throws IOException {
+		//previousPosition = null;
 		if(!captured) {
 			for(int square : GetLegalMoves()) {
 				if(square == position) {
+					previousPositionFENAddOn = Board.GetFENAdvancedAddOn();
 					// 0 want dan staat er niemand
 					boolean isOppositeColor = Board.GetPositionGrid()[position] != 0 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
 					if(isOppositeColor) {
 						Capture(position);
 						movesTilDraw = -1;
+					} else {
+						capturedPiece = null;
 					}
 					
+					
+					for(Piece p : Board.activePieces) {
+						p.previousPosition = p.position;
+					}
+					
+					previousPosition = this.position;
+					
+					
 					if(CanCastleShort() && (position == Chess.G8 || position == Chess.G1)) {
-						Controlla.CastleShort(isWhite);
+						//Controlla.CastleShort(isWhite);
 						CastleShort();
 					} else if(CanCastleLong() && (position == Chess.C8 || position == Chess.C1)) {
-						Controlla.CastleLong(isWhite);
+						//Controlla.CastleLong(isWhite);
 						CastleLong();
 					} else {
-						Controlla.MovePieceGUI(this, position);
+						
+						//Controlla.MovePieceGUI(this, position);
 						this.position = position;
 					}
 					movesTilDraw++;
@@ -49,13 +62,15 @@ public class King extends Piece{
 	ArrayList<Integer> attackedSquaresTotalList = new ArrayList<Integer>();
 	int[] attackedSquaresTotal;
 	@Override int[] GetMoveableSquares() {
-		
+		moveableSquaresList.removeAll(moveableSquaresList);
+		attackedSquaresTotalList.removeAll(attackedSquaresTotalList);
 		for(Piece piece : Board.GetPiecesOfColor(!isWhite)) {
 			for(int square : piece.GetAttackingSquares()) {
 				attackedSquaresTotalList.add(square);
 			}
 		}
 		attackedSquaresTotal = attackedSquaresTotalList.stream().mapToInt(Integer::intValue).toArray();
+		
 		if(CanCastleShort()) {
 			if(isWhite) {
 				moveableSquaresList.add(Chess.G1);
@@ -81,10 +96,8 @@ public class King extends Piece{
 				}
 			}			
 		}
-		attackedSquaresTotalList.removeAll(attackedSquaresTotalList);
-		moveableSquares = moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
-		moveableSquaresList.removeAll(moveableSquaresList);
-		return moveableSquares;
+		
+		return moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
 	@Override public int[] GetMoveableSquaresInCheck() {
@@ -93,15 +106,13 @@ public class King extends Piece{
 	
 	
 	@Override public int[] GetAttackingSquares() {
-		
+		attackSquaresList.removeAll(attackSquaresList);
 		for(int directionIndex : directionIndices) {
 			if(Chess.NumSquaresToEdge[position][directionIndex] != 0) {
 				attackSquaresList.add(this.position + possibleDirections[directionIndex]);
 			}			
 		}
-		moveableSquares = attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
-		attackSquaresList.removeAll(attackSquaresList);
-		return attackSquares;
+		return attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
 	//knight directions and queen directions combined
@@ -131,8 +142,11 @@ public class King extends Piece{
 	
 	ArrayList<Integer> squaresList = new ArrayList<Integer>();
 	int[] squares;
+	public static int checks;
 	public void isInCheck() {
+		squaresList.removeAll(squaresList);
 		for(Piece piece : Board.GetPiecesOfColor(!isWhite)) {
+			piece.attackSquaresList.removeAll(attackSquaresList);
 			for(int square : piece.GetAttackingSquares()) {
 				if(square == position) {
 					squaresList.add(square);
@@ -142,13 +156,14 @@ public class King extends Piece{
 			}
 		}
 		squares = squaresList.stream().mapToInt(Integer::intValue).toArray();
-		squaresList.removeAll(squaresList);
 		if(squares.length > 1) {
 			isInCheck = true;
 			doubleCheck = true;
+			checks++;
 			return;
 		} else if(squares.length== 1) {
 			isInCheck = true;
+			checks++;
 			return;
 		}
 		doubleCheck = false;
@@ -329,6 +344,10 @@ public class King extends Piece{
 		} else {
 			rookShort = Board.FindPieceByPosition(Chess.H8);
 			rookLong = Board.FindPieceByPosition(Chess.A8);
+		}
+		
+		if(position == -1) {
+			captured = true;
 		}
 		
 		Model.pieces.add(this);

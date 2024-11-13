@@ -15,6 +15,10 @@ public class Queen extends Piece {
 			stone = Chess.BLACK_QUEEN;
 		}
 		
+		if(position == -1) {
+			captured = true;
+		}
+		
 		Model.pieces.add(this);
 	}
 }

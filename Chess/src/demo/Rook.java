@@ -15,6 +15,10 @@ public class Rook extends Piece{
 			stone = Chess.BLACK_ROOK;
 		}
 		
+		if(position == -1) {
+			captured = true;
+		}
+		
 		Model.pieces.add(this);
 	}
 }

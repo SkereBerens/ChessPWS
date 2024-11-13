@@ -13,6 +13,10 @@ public class Bishop extends Piece {
 			stone = Chess.BLACK_BISHOP;
 		}
 		
+		if(position == -1) {
+			captured = true;
+		}
+		
 		Model.pieces.add(this);
 	}
 }

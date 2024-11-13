@@ -337,12 +337,7 @@ public class Guihihi implements MouseListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				selectedPiece = findPieceByPosition(Chess.strToSqi(selectText.getText()));
-				if(selectedPiece == null) {
-					return;
-				}
-				h.legalMoves = Controlla.GetLegalMoves(selectedPiece);
-				h.repaint();
+				//Controlla.UndoMove();
 			}
 			
 		});

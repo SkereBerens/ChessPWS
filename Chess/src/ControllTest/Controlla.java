@@ -116,6 +116,10 @@ public class Controlla {
 		
 		pieceguisUpdated.removeAll(pieceguisUpdated);
 	}
+	
+//	public static void UndoMove() {
+//		Piece.RevertMove();
+//	}
 
 	public static void LoadPosition(String fen) {
 		Board.LoadPosition(fen);

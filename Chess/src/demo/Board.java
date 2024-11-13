@@ -34,6 +34,18 @@ public class Board {
 			positionGrid[piece.position] = piece.stone;
 		}
 	}
+	
+	
+	static ArrayList<Piece> test = new ArrayList<Piece>();
+	public static void OrderActivePieces() {
+		activePieces.clear();
+		for(Piece p : Model.pieces) {
+			if(!p.captured) {
+				addPiece(p);
+			}
+		}
+		updatePosition();
+	}
 
 	static String[] emptySpaces = {"", "1", "2", "3", "4", "5", "6", "7", "8"};
 	
@@ -42,6 +54,7 @@ public class Board {
 	static String positionFen = "";
 	//FEN is een soort notatie voor een positie: alleen van posities stukken
 	static public String GetFENBasic() {
+		//updatePosition();
 		positionFen = "";
 		for(int i = 0; i < 8; i ++) {
 			for(int j = 0; j < 8; j++) {
@@ -73,7 +86,7 @@ public class Board {
 			positionFenAdvancedAddOn += "w";
 		}
 		
-		positionFenAdvanced += " ";
+		positionFenAdvancedAddOn += " ";
 		if(GetKing(-1).hasCastlingRightsShort || GetKing(-1).hasCastlingRightsLong || GetKing(1).hasCastlingRightsLong || GetKing(1).hasCastlingRightsLong) {
 			if(GetKing(-1).hasCastlingRightsShort) {
 				positionFenAdvancedAddOn += "K";
@@ -91,10 +104,12 @@ public class Board {
 			positionFenAdvancedAddOn += "-";
 		}
 		
+		
 		positionFenAdvancedAddOn += " ";
 		for(Piece pawn : GetPiecesOfType(Chess.WHITE_PAWN)) {
 			if(	((Pawn)pawn).enpassantableSquare != -1) {
 				enpassantAbleSquare = ((Pawn)pawn).enpassantableSquare;
+				break;
 			}
 		}
 		if(enpassantAbleSquare == -1) {
@@ -134,12 +149,17 @@ public class Board {
 	static int enpassantableSquare = -1;
 	
 	static int position = 56;
+	
 	public static void LoadPosition(String fen) {
 		fenChars = fen.toCharArray();
+		//rnbqkbnr/pppppppp/8/8/8/7N/PPPPPPPP/RNBQKB1R b KQkq 1 1
+		//rnbqkbnr/ppppppp1/7p/8/8/7N/PPPPPPPP/RNBQKB1R w KQkq 0 2
 		for(Piece piece : activePieces) {
 			piece.captured = true;
 			piece.isPinned = false;
 			piece.hasMoved = false;
+			piece.king = null;
+			piece.attackingPiece = null;
 			if(Chess.stoneToPiece(piece.stone) == 6) {
 				((King) piece).isInCheck = false;
 				((King) piece).doubleCheck = false;
@@ -150,6 +170,7 @@ public class Board {
 			
 			if(Chess.stoneToPiece(piece.stone) == 5) {
 				((Pawn) piece).enpassantableSquare = -1;
+				((Pawn) piece).isPinnedForEnPassant = false;
 			}
 		}
 		Gamemanager.positionsFen.removeAll(Gamemanager.positionsFen);
@@ -162,11 +183,12 @@ public class Board {
 			if(Chess.IsInListChr(Chess.pieceChars, ch)) {
 				for(Piece piece : Model.pieces) {
 					if(piece.stone ==  Chess.charToStone(ch) && !activePieces.contains(piece)) {
-						piece.position = position;
 						//System.out.println("ITS THIS PIECE: " + ch + " ON THIS POSITION " + piece.position);
-						activePieces.add(piece);
+						addPiece(piece);
+						piece.position = position;
 						piece.captured = false;
 						position += 1;
+						
 						break;
 					}
 				}
@@ -176,9 +198,11 @@ public class Board {
 				position +=  Integer.parseInt(String.valueOf(ch));
 			}
 		}
-		
-		Controlla.UpdateAllPieceGUIPosition();
+		//OrderActivePieces();
+		//Controlla.UpdateAllPieceGUIPosition();
 		position = 56;
+
+		updatePosition();
 		
 		
 		fenAdvancedAddOn.split(" ");
@@ -188,9 +212,20 @@ public class Board {
 		
 		if(fenAdvancedSections[colorToMove].equals("w")) {
 			Piece.ply = 1;
-		} else {
+			for(Piece slidingPiece : Board.GetSlidingPieces(1)) {
+				//System.out.println("oma lord");
+				slidingPiece.Pin();
+			}
+			GetKing(-1).isInCheck();
+			System.out.println(GetKing(-1).isInCheck);
+		} else if(fenAdvancedSections[colorToMove].equals("b")){
 			Piece.ply = 2;
-		}
+			for(Piece slidingPiece : Board.GetSlidingPieces(-1)) {
+				//System.out.println("oma lord");
+				slidingPiece.Pin();
+			}
+			GetKing(1).isInCheck();
+		} 
 		
 		for(char ch : fenAdvancedSections[castlingRights].toCharArray()) {
 			if(ch == 'K') {
@@ -204,29 +239,99 @@ public class Board {
 			}
  		}
 		
+		enpassantableSquare = -1;
 		if(!fenAdvancedSections[enpassantSquare].equals("-")) {
-			enpassantAbleSquare = Chess.strToSqi(fenAdvancedSections[enpassantSquare]);
-			System.out.println(Chess.sqiToStr(enpassantAbleSquare));
-			if(Chess.sqiToRow(enpassantAbleSquare) == 5) {
-				((Pawn)FindPieceByPosition(enpassantAbleSquare - 8)).enpassantableSquare = enpassantAbleSquare;
-			} else if(Chess.sqiToRow(enpassantAbleSquare) == 2) {
-				((Pawn)FindPieceByPosition(enpassantAbleSquare + 8)).enpassantableSquare = enpassantAbleSquare;
+			enpassantableSquare = Chess.strToSqi(fenAdvancedSections[enpassantSquare]);
+			if(Chess.sqiToRow(enpassantableSquare) == 5) {
+				((Pawn)FindPieceByPosition(enpassantableSquare - 8)).enpassantableSquare = enpassantableSquare;
+			} else if(Chess.sqiToRow(enpassantableSquare) == 2) {
+				((Pawn)FindPieceByPosition(enpassantableSquare + 8)).enpassantableSquare = enpassantableSquare;
 			}
 		}
-		
+	
 		Piece.movesTilDraw = Integer.parseInt(fenAdvancedSections[movesTilDraw]);
 		Piece.fullMoves = Integer.parseInt(fenAdvancedSections[fullMoves]);
 		
 		updatePosition();
 	}
 	
+	
+	
+	
+	
+	
+	static String fenAdvancedAddOn1;
+	
+	static String[] fenAdvancedSections1 =  new String[5];
+	
+	static int enpassantableSquare1 = -1;
+	
+	
+	public static void LoadFENAdvancedAddOn(String fen) {
+		//OrderActivePieces();
+		fenAdvancedAddOn1 = fen;
+		fenAdvancedAddOn1.split(" ");
+		for(int i = 0; i < fenAdvancedAddOn1.split(" ").length; i++) {
+			fenAdvancedSections1[i] = fenAdvancedAddOn1.split(" ")[i];
+		}
+		
+		if(fenAdvancedSections1[colorToMove].equals("w")) {
+			Piece.ply = 1;
+			for(Piece slidingPiece : Board.GetSlidingPieces(1)) {
+				//System.out.println("oma lord");
+				slidingPiece.Pin();
+			}
+			GetKing(-1).isInCheck();
+		} else if(fenAdvancedSections1[colorToMove].equals("b")){
+			Piece.ply = 2;
+			for(Piece slidingPiece : Board.GetSlidingPieces(-1)) {
+				//System.out.println("oma lord");
+				slidingPiece.Pin();
+			}
+			GetKing(1).isInCheck();
+		} 
+		
+		for(char ch : fenAdvancedSections1[castlingRights].toCharArray()) {
+			if(ch == 'K') {
+				GetKing(-1).hasCastlingRightsShort = true;
+			} else if(ch == 'Q') {
+				GetKing(-1).hasCastlingRightsLong = true;
+			} else if(ch == 'k') {
+				GetKing(1).hasCastlingRightsShort = true;
+			} else if(ch == 'q') {
+				GetKing(1).hasCastlingRightsLong = true;
+			}
+ 		}
+		
+		enpassantableSquare1 = -1;
+		if(!fenAdvancedSections1[enpassantSquare].equals("-")) {
+			enpassantableSquare1 = Chess.strToSqi(fenAdvancedSections1[enpassantSquare]);
+			if(Chess.sqiToRow(enpassantableSquare1) == 5) {
+				((Pawn)FindPieceByPosition(enpassantableSquare1 - 8)).enpassantableSquare = enpassantableSquare1;
+			} else if(Chess.sqiToRow(enpassantableSquare1) == 2) {
+				((Pawn)FindPieceByPosition(enpassantableSquare1 + 8)).enpassantableSquare = enpassantableSquare1;
+			}
+		}
+	
+		Piece.movesTilDraw = Integer.parseInt(fenAdvancedSections1[movesTilDraw]);
+		Piece.fullMoves = Integer.parseInt(fenAdvancedSections1[fullMoves]);
+		
+		updatePosition();
+	}
+	
+	
+	
+	
+	
+	
 	public static void addPiece(Piece p) {
 		activePieces.add(p);
 	}
-	
+	public static int captures;
 	public static void RemovePiece(int position) {
 		Piece piece = FindPieceByPosition(position);
 		if(piece != null) {
+			captures++;
 			piece.captured = true;
 			activePieces.remove(piece);
 		}

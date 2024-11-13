@@ -7,29 +7,39 @@ import chesspresso.*;
 
 public class Pawn extends Piece{
 	
-	@Override public void MoveTo(int position) throws IOException {
+	public static int enpasants;
+	@Override public void MoveTo(int position) {
+		//previousPosition = null;
 		if(!captured) {
 			king = ((King)Board.GetKing(stone));
 			attackingPiece = king.GetCheckingPiece();
 			for(int square : GetLegalMoves()) {
 				if(square == position) {
 					// 0 want dan staat er niemand
-					
+					previousPositionFENAddOn = Board.GetFENAdvancedAddOn();
 					boolean isOppositeColor = Board.GetPositionGrid()[position] != 0 && Chess.stoneToColor(Board.GetPositionGrid()[position]) != Chess.stoneToColor(stone);
 					boolean isOnDiagonalSquare = ((int) (this.position - Math.signum(stone)* 9) == position || (int) (this.position - Math.signum(stone)* 7) == position);
 					
-					if(isOppositeColor && isOnDiagonalSquare) {
-						Capture(position);
+					if(isOnDiagonalSquare) {
+						if(isOppositeColor) {
+							Capture(position);
+						} else {
+							for(Piece pawn :  Board.GetEnemyPiecesOfType(stone)) {
+								if(((Pawn) pawn).enpassantableSquare == position) {
+									enpasants++;
+									Capture(pawn.position);
+									break;
+								} 
+							}
+						}
+						
+					} else {
+						capturedPiece = null;
 					}
 					
 					//enpassant
 					
-					for(Piece pawn :  Board.GetEnemyPiecesOfType(stone)) {
-						if(isOnDiagonalSquare && ((Pawn) pawn).enpassantableSquare == position) {
-							Capture(pawn.position);
-							break;
-						}
-					}
+					
 					
 					if(Math.abs(this.position - position) == 16) {
 						enpassantableSquare = (int) (position + 8 * Math.signum(stone));
@@ -37,11 +47,24 @@ public class Pawn extends Piece{
 						enpassantableSquare = -1;
 					}
 					
-					Controlla.MovePieceGUI(this, position);
+					
+					for(Piece p : Board.activePieces) {
+						p.previousPosition = p.position;
+					}
+					
+					previousPosition = this.position;
+					
+					
+					//Controlla.MovePieceGUI(this, position);
 					this.position = position;
-					//before actually moving cuz otherwise it will select captured piece
+					
 					if((Chess.sqiToRow(this.position) == 7 && isWhite) || (Chess.sqiToRow(this.position) == 0 && !isWhite)) {
-						Promote((int) Math.signum(stone) * Chess.BLACK_QUEEN);
+						try {
+							Promote((int) Math.signum(stone) * Chess.BLACK_QUEEN);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					//cuz if pawn move then fiftymove rule reset
 					movesTilDraw = 0;
@@ -51,6 +74,10 @@ public class Pawn extends Piece{
 			}
 			
 		}
+//		
+//		if(this.position != position) {
+//			throw new Exception("Exception message");
+//		}
 	} 
 	
 	public int enpassantableSquare = -1;
@@ -58,6 +85,7 @@ public class Pawn extends Piece{
 	boolean enemyPieceIsOnDiagonal9;
 	boolean isNotOnBoardEdge7;
 	boolean isNotOnBoardEdge9;
+	public boolean isPinnedForEnPassant;
 	
 	public boolean isAttackingEnpassantableSquare(int diagonal) {
 		if(!isNotOnBoardEdge9 && diagonal == 9) {
@@ -65,6 +93,10 @@ public class Pawn extends Piece{
 		}
 		
 		if(!isNotOnBoardEdge7 && diagonal == 7) {
+			return false;
+		}
+		
+		if(isPinnedForEnPassant) {
 			return false;
 		}
 		
@@ -79,6 +111,7 @@ public class Pawn extends Piece{
 
 	
 	@Override int[] GetMoveableSquares() {
+		moveableSquaresList.removeAll(moveableSquaresList);
 		isNotOnBoardEdge9 = (Chess.NumSquaresToEdge[position][2] != 0 && isWhite) || (Chess.NumSquaresToEdge[position][3] != 0 && !isWhite);
 		isNotOnBoardEdge7 = (Chess.NumSquaresToEdge[position][0] != 0 && isWhite) || (Chess.NumSquaresToEdge[position][1] != 0 && !isWhite);
 		enemyPieceIsOnDiagonal9 = false;
@@ -153,15 +186,19 @@ public class Pawn extends Piece{
 		//signum geeft het teken van iets: dus  +1 of  -1
 			
 		//convert een list naar een array (op internet opgezocht)
-		moveableSquares = moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();;
-		moveableSquaresList.removeAll(moveableSquaresList);
-		return moveableSquares;
-	}	
-	
-	@Override int[] GetMoveableSquaresInCheck() {
-		int[] moveableSquaresNoCheck = GetMoveableSquares();
-		int[] blocksquares = GetBlockSquares();
 		
+		return moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
+	}	
+
+	int[] moveableSquaresNoCheck;
+	int[] blocksquares;
+	boolean IsAttackingAttackingPieceEnPassantSquare7;
+	boolean IsAttackingAttackingPieceEnPassantSquare9;
+	@Override int[] GetMoveableSquaresInCheck() {
+		moveableSquaresList.removeAll(moveableSquaresList);
+		moveableSquaresNoCheck = GetMoveableSquares();
+		moveableSquaresList.removeAll(moveableSquaresList);
+		blocksquares = GetBlockSquares();
 		for(int i : moveableSquaresNoCheck) {
 			for(int j : blocksquares) {
 				if(i == j) {
@@ -169,18 +206,32 @@ public class Pawn extends Piece{
 				}
 			}
 		}
-		moveableSquares = moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
-		moveableSquaresList.removeAll(moveableSquaresList);
-		return moveableSquares;
-	}
-	@Override public int[] GetAttackingSquares() {
-		if(!captured) {
-			attackSquaresList.add((int) (this.position - Math.signum(stone)* 7));
-			attackSquaresList.add((int) (this.position - Math.signum(stone)* 9));
+		
+		IsAttackingAttackingPieceEnPassantSquare9 = attackingPiece.stone == Math.signum(stone) * Chess.WHITE_PAWN && ((Pawn) attackingPiece).enpassantableSquare != -1 && (isAttackingEnpassantableSquare(9));
+		IsAttackingAttackingPieceEnPassantSquare7=  attackingPiece.stone == Math.signum(stone) * Chess.WHITE_PAWN && ((Pawn) attackingPiece).enpassantableSquare != -1 && (isAttackingEnpassantableSquare(7));
+		if(IsAttackingAttackingPieceEnPassantSquare7) {
+			moveableSquaresList.add((int) (this.position - Math.signum(stone)* 7));
+		} else if(IsAttackingAttackingPieceEnPassantSquare9) {
+			moveableSquaresList.add((int) (this.position - Math.signum(stone)* 9));
 		}
-		attackSquares =  attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
+		return moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
+	}
+	
+	//{7,-7,9,-9,8,-8,1,-1,6,-6,15,-15,10,-10,17,-17}
+	@Override public int[] GetAttackingSquares() {
 		attackSquaresList.removeAll(attackSquaresList);
-		return attackSquares;
+		isNotOnBoardEdge9 = (Chess.NumSquaresToEdge[position][2] != 0 && isWhite) || (Chess.NumSquaresToEdge[position][3] != 0 && !isWhite);
+		isNotOnBoardEdge7 = (Chess.NumSquaresToEdge[position][0] != 0 && isWhite) || (Chess.NumSquaresToEdge[position][1] != 0 && !isWhite);
+		if(!captured && isNotOnBoardEdge9) {
+			
+			attackSquaresList.add((int) (this.position - Math.signum(stone)* 9));
+		} 
+		if(!captured && isNotOnBoardEdge7) {
+			
+			attackSquaresList.add((int) (this.position - Math.signum(stone)* 7));
+		}
+		return attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
+		
 	}
 	
 	Piece PromotionPiece;
@@ -206,6 +257,10 @@ public class Pawn extends Piece{
 			stone = Chess.WHITE_PAWN;
 		} else {
 			stone = Chess.BLACK_PAWN;
+		}
+		
+		if(position == -1) {
+			captured = true;
 		}
 		
 		Model.pieces.add(this);

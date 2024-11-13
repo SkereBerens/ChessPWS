@@ -6,7 +6,7 @@ import chesspresso.Chess;
 
 public class Knight extends Piece{
 	@Override int[] GetMoveableSquares() {
-		
+		moveableSquaresList.removeAll(moveableSquaresList);
 		if(!captured && !isPinned) {
 			for(int directionIndex : directionIndices) {
 				if(Chess.NumSquaresToEdge[position][directionIndex] != 0) {
@@ -18,34 +18,32 @@ public class Knight extends Piece{
 				}			
 			}
 		}
-		moveableSquares = moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();;
-		moveableSquaresList.removeAll(moveableSquaresList);
-		return moveableSquares;
+		return moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
 	@Override int[] GetMoveableSquaresInCheck() {
+		moveableSquaresList.removeAll(moveableSquaresList);
 		int[] blocksquares = GetBlockSquares();
 		if(!captured && !isPinned) {
 			for(int directionIndex : directionIndices) {
+				if(Chess.NumSquaresToEdge[position][directionIndex] != 0) {
 					if(Chess.IsInList(blocksquares, this.position + possibleDirections[directionIndex] )) {
 						moveableSquaresList.add(this.position + possibleDirections[directionIndex] );
 					}
+				}	
 			}
 		}
-		moveableSquares = moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();;
-		moveableSquaresList.removeAll(moveableSquaresList);
-		return moveableSquares;
+		return moveableSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
 	@Override public int[] GetAttackingSquares() {
+		attackSquaresList.removeAll(attackSquaresList);
 		for(int directionIndex : directionIndices) {
 			if(Chess.NumSquaresToEdge[position][directionIndex] != 0) {
 				attackSquaresList.add(this.position + possibleDirections[directionIndex]);
 			}			
 		}
-		attackSquares = attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
-		attackSquaresList.removeAll(attackSquaresList);
-		return attackSquares;
+		return  attackSquaresList.stream().mapToInt(Integer::intValue).toArray();
 	}
 	
 	Knight(int startingPos, boolean color) {
@@ -56,6 +54,10 @@ public class Knight extends Piece{
 			stone = Chess.WHITE_KNIGHT;
 		} else {
 			stone = Chess.BLACK_KNIGHT;
+		}
+		
+		if(position == -1) {
+			captured = true;
 		}
 		
 		Model.pieces.add(this);

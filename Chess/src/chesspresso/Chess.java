@@ -567,9 +567,10 @@ public abstract class Chess
 			return 4;
 		} else if(directionIndex == 6) {
 			return 7;
-		} else {
+		} else if(directionIndex == 7){
 			return 6;
-		}
+		} 
+		return -1;
 	}
     
 }
