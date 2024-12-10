@@ -92,7 +92,7 @@ public class Piece {
 						
 						
 						
-						//Controlla.MovePieceGUI(this, position);
+						Controlla.MovePieceGUI(this, position);
 						this.position = position;
 						movesTilDraw++;
 						MiscMoveFunctions();
@@ -364,16 +364,13 @@ public class Piece {
 	
 	void Capture(int position) {
 		capturedPiece = Board.FindPieceByPosition(position);
-		//Controlla.CapturePiece(Board.FindPieceByPosition(position));
+		Controlla.CapturePiece(Board.FindPieceByPosition(position));
 		Board.RemovePiece(position);
 	}
 	
 	void UnCapturePiece(Piece p) {
 		if(p == null) {
 			return;
-		}
-		if(Chess.stoneToPiece(p.stone) == 6) {
-			System.out.println("WATTESIGHMAAAA");
 		}
 		Board.addPiece(p);
 		p.captured = false;

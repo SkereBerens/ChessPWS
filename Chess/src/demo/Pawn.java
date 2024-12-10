@@ -55,7 +55,7 @@ public class Pawn extends Piece{
 					previousPosition = this.position;
 					
 					
-					//Controlla.MovePieceGUI(this, position);
+					Controlla.MovePieceGUI(this, position);
 					this.position = position;
 					
 					if((Chess.sqiToRow(this.position) == 7 && isWhite) || (Chess.sqiToRow(this.position) == 0 && !isWhite)) {

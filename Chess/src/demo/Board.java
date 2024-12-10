@@ -87,7 +87,7 @@ public class Board {
 		}
 		
 		positionFenAdvancedAddOn += " ";
-		if(GetKing(-1).hasCastlingRightsShort || GetKing(-1).hasCastlingRightsLong || GetKing(1).hasCastlingRightsLong || GetKing(1).hasCastlingRightsLong) {
+		if(GetKing(-1).hasCastlingRightsShort || GetKing(-1).hasCastlingRightsLong || GetKing(1).hasCastlingRightsShort || GetKing(1).hasCastlingRightsLong) {
 			if(GetKing(-1).hasCastlingRightsShort) {
 				positionFenAdvancedAddOn += "K";
 			}
@@ -183,7 +183,6 @@ public class Board {
 			if(Chess.IsInListChr(Chess.pieceChars, ch)) {
 				for(Piece piece : Model.pieces) {
 					if(piece.stone ==  Chess.charToStone(ch) && !activePieces.contains(piece)) {
-						//System.out.println("ITS THIS PIECE: " + ch + " ON THIS POSITION " + piece.position);
 						addPiece(piece);
 						piece.position = position;
 						piece.captured = false;
@@ -198,8 +197,7 @@ public class Board {
 				position +=  Integer.parseInt(String.valueOf(ch));
 			}
 		}
-		//OrderActivePieces();
-		//Controlla.UpdateAllPieceGUIPosition();
+		Controlla.UpdateAllPieceGUIPosition();
 		position = 56;
 
 		updatePosition();

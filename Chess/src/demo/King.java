@@ -38,14 +38,14 @@ public class King extends Piece{
 					
 					
 					if(CanCastleShort() && (position == Chess.G8 || position == Chess.G1)) {
-						//Controlla.CastleShort(isWhite);
+						Controlla.CastleShort(isWhite);
 						CastleShort();
 					} else if(CanCastleLong() && (position == Chess.C8 || position == Chess.C1)) {
-						//Controlla.CastleLong(isWhite);
+						Controlla.CastleLong(isWhite);
 						CastleLong();
 					} else {
 						
-						//Controlla.MovePieceGUI(this, position);
+						Controlla.MovePieceGUI(this, position);
 						this.position = position;
 					}
 					movesTilDraw++;
@@ -240,17 +240,19 @@ public class King extends Piece{
 		if(isWhite) {
 			this.hasMoved = true;
 			rookShort.position = Chess.F1;
+			rookShort.hasMoved = true;
 			this.position = Chess.G1;
 			return;
 		}
 		this.hasMoved = true;
 		rookShort.position = Chess.F8;
+		rookShort.hasMoved = true;
 		this.position = Chess.G8;
 	}
 	
 	
 	
-	void CheckShortCastlingRights() {
+	public void CheckShortCastlingRights() {
 	
 		if(!hasMoved && !rookShort.hasMoved && !rookShort.captured) {
 			return;
@@ -297,7 +299,7 @@ public class King extends Piece{
 		this.position = Chess.C8;	
 	}
 	
-	void CheckLongCastlingRights() {
+	public void CheckLongCastlingRights() {
 		if(!hasMoved && !rookLong.hasMoved && !rookLong.captured) {
 			return;
 		}
@@ -317,9 +319,9 @@ public class King extends Piece{
 				}
 			}
 			
-			if(isWhite && (Board.GetPositionGrid()[Chess.D1] != 0|| Board.GetPositionGrid()[Chess.C1] != 0)) {
+			if(isWhite && (Board.GetPositionGrid()[Chess.D1] != 0 || Board.GetPositionGrid()[Chess.C1] != 0 || Board.GetPositionGrid()[Chess.B1] != 0)) {
 				return false;
-			} else if(!isWhite && (Board.GetPositionGrid()[Chess.D8] != 0|| Board.GetPositionGrid()[Chess.C8] != 0)) {
+			} else if(!isWhite && (Board.GetPositionGrid()[Chess.D8] != 0 || Board.GetPositionGrid()[Chess.C8] != 0 || Board.GetPositionGrid()[Chess.B8] != 0)) {
 				return false;
 			}
 			return true;
